@@ -18,7 +18,7 @@ jobs:
           script: |
             cd ./HermosaCoffee/hermosa_backend
             git fetch origin
-            git checkout GiuaKy
+            git checkout main
             git pull
             npm install
             pm2 reload HermosaCoffee
