@@ -22,7 +22,7 @@ router.post("/create-payment-vnpay", async(req,res)=>{
     tomorrow.setDate(tomorrow.getDate()+1)
 
     const vnpayResponse = await vnpay.buildPaymentUrl({
-        vnp_Amount: fOrder.totalInvoice*1000,
+        vnp_Amount: fOrder.totalInvoice*100,
         vnp_IpAddr: '13.250.179.85',
         vnp_TxnRef: fOrder.orderID,
         vnp_OrderInfo: `Thanh toán đơn hàng ${fOrder.orderID}`,
