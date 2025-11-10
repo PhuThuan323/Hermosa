@@ -19,6 +19,7 @@ jobs:
             cd ./HermosaCoffee/hermosa_backend
             git fetch origin
             git checkout main
+            git reset --hard origin/main
             git pull
             npm install
             pm2 reload HermosaCoffee
