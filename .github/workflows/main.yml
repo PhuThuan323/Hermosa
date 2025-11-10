@@ -1,0 +1,24 @@
+name: Hermosa Coffee Deployment
+
+on:
+  push:
+    branches: [GiuaKy]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.HOST }}
+          username: ubuntu
+          key: ${{ secrets.DEPLOY_KEY }}
+          port: 22
+          script: |
+            cd ./HermosaCoffee/hermosa_backend
+            git fetch origin
+            git checkout GiuaKy
+            git pull
+            npm install
+            pm2 reload HermosaCoffee
