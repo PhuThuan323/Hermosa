@@ -2,7 +2,7 @@ name: Hermosa Coffee Deployment
 
 on:
   push:
-    branches: [GiuaKy]
+    branches: [main]
 
 jobs:
   deploy:
