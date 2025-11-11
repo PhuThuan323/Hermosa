@@ -9,30 +9,30 @@ const { VNPay, ignoreLogger, VnpLocale, dateFormat, ProductCode } = require('vnp
 router.post("/create-payment-vnpay", async(req,res)=>{
     try{
         const {orderID} = req.body
-    const fOrder = await order.findOne({orderID})
-    const vnpay = new VNPay({
-        tmnCode: process.env.VNP_TMN_CODE,
-        secureSecret: process.env.VNP_HASH_SECRET,
-        vnpayHost: 'https://sandbox.vnpayment.vn',
-        testMode: true,
-        hashAlgorithm: 'SHA512',
-        loggerFn: ignoreLogger
-    })
-    const tomorrow = new Date()
-    tomorrow.setDate(tomorrow.getDate()+1)
+        const fOrder = await order.findOne({orderID})
+        const vnpay = new VNPay({
+            tmnCode: process.env.VNP_TMN_CODE,
+            secureSecret: process.env.VNP_HASH_SECRET,
+            vnpayHost: 'https://sandbox.vnpayment.vn',
+            testMode: true,
+            hashAlgorithm: 'SHA512',
+            loggerFn: ignoreLogger
+        })
+        const tomorrow = new Date()
+        tomorrow.setDate(tomorrow.getDate()+1)
 
-    const vnpayResponse = await vnpay.buildPaymentUrl({
-        vnp_Amount: fOrder.totalInvoice*100,
-        vnp_IpAddr: '13.250.179.85',
-        vnp_TxnRef: fOrder.orderID,
-        vnp_OrderInfo: `Thanh toán đơn hàng ${fOrder.orderID}`,
-        vnp_OrderType: ProductCode.Other,
-        vnp_ReturnUrl: process.env.VNP_RETURN_URL,
-        vnp_Locale: VnpLocale.VN,
-        vnp_CreateDate: dateFormat(new Date()),
-        vnp_ExpireDate: dateFormat(tomorrow)
-    })
-    return res.status(200).json(vnpayResponse)
+        const vnpayResponse = await vnpay.buildPaymentUrl({
+            vnp_Amount: fOrder.totalInvoice,
+            vnp_IpAddr: '127.0.0.1',
+            vnp_TxnRef: fOrder.orderID,
+            vnp_OrderInfo: `Thanh toán đơn hàng ${fOrder.orderID}`,
+            vnp_OrderType: ProductCode.Other,
+            vnp_ReturnUrl: process.env.VNP_RETURN_URL,
+            vnp_Locale: VnpLocale.VN,
+            vnp_CreateDate: dateFormat(new Date()),
+            vnp_ExpireDate: dateFormat(tomorrow)
+        })
+        return res.status(200).json(vnpayResponse)
     }
     catch(err){
         return res.status(500).json({message: 'Lỗi hệ thống', details: err.message})

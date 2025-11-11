@@ -120,9 +120,10 @@ router.post('/momo-notify', async (req, res) => {
     if (resultCode === 0) {
       await order.findOneAndUpdate(
         { orderID: orderId },
-        { paymentStatus: "done", payingIn: new Date() }
+        { paymentStatus: "done", payingIn: new Date() },
+        { new: true }
       );
-      return res.status(200).json({ message: "Payment successful" });
+      return res.status(200).json({ message: "Payment successful", detail: message });
     } else {
       return res.status(400).json({ message: "Payment failed", detail: message });
     }
@@ -142,6 +143,7 @@ router.get('/confirm', async(req,res)=>{
             status: findOrder.paymentStatus,
             method: findOrder.paymentMethod,
             time: findOrder.payingIn,
+            
         });
     }
     catch{
