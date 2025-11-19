@@ -36,7 +36,7 @@ async function SumOfProduct(UID) {
 //---------------------------TAO DON HANG MOI------------------
 router.post('/create', async (req,res)=>{
     try{
-    let {userID,paymentMethod, paymentStatus, deliver, deliverAddress, note} = req.body
+    let {userID,paymentMethod, paymentStatus, deliver, deliverAddress, note, tipsforDriver} = req.body
     const userCart = await cart.findOne({userID})
     if(userCart.items.length === 0){
         return res.json({status:"Failed", message:"Cart is empty"})
@@ -46,7 +46,7 @@ router.post('/create', async (req,res)=>{
         orderID: `ORD-${Date.now()}`,
         status: "pending",
         userID,
-        totalInvoice: total,
+        totalInvoice: total + tipsforDriver,
         products: detailedItems,
         paymentMethod: paymentMethod,
         paymentStatus: paymentStatus,

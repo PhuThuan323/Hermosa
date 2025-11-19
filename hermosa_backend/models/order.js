@@ -17,6 +17,7 @@ const orderSchema = new Schema({
     deliver: {type: Boolean, default: false},
     deliverAddress: {type: String, default: null},
     deliverIn: Date,
+    tipsforDriver: {type: Number, default: 0},
     note: {type: String, default:null},
 
     reviewofOrder: String,

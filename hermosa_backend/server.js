@@ -41,4 +41,10 @@ app.use('/payment-vnpay', payment2Route)
 const toppingRoute = require('./api/toppings')
 app.use('/topping', toppingRoute)
 
+const voucherRoute = require('./api/vouchers')
+app.use('/voucher', voucherRoute)
+
+// const notificationRoute = require('./api/notifications')
+// app.use('/notification', notificationRoute)
+
 app.listen(port, () => console.log("Server running on port 8000"));

@@ -179,13 +179,31 @@ PUT http://localhost:8000/order/change-order-review?orderID=ORD-1760863513250
   ]
 }
 ###
-POST http://localhost:8000/payment/create-payment-momo
+POST http://localhost:8000/payment-momo/create-payment-momo
 Content-Type: application/json
 
 {
     "orderID": "ORD-1761275648168",
     "userID": "68f79841532b8744f537b2e3"
 }
+###
+GET http://localhost:8000/payment-momo/confirm?orderID=ORD-1762821679885
+###
+POST http://localhost:8000/payment-momo/create-payment-momo
+Content-Type: application/json
+
+{
+    "orderID": "ORD-1762739684875"
+}
+###
+POST http://13.250.179.85/payment-momo/create-payment-momo
+Content-Type: application/json
+
+{
+    "orderID": "ORD-1762739684875"
+}
+
+
 ###
 POST http://localhost:8000/topping/add 
 Content-Type: application/json
@@ -229,3 +247,18 @@ Content-Type: application/json
 }
 ### 
 GET http://localhost:8000/cart/view-and-caculate-total-money?userID=68f79841532b8744f537b2e3
+
+### 
+POST http://localhost:8000/voucher/create
+Content-Type: application/json
+
+{
+    "description": "Tôi bị khùng",
+    "discountType": "percentage",
+    "discountValue": "10",
+    "minPurchaseAmount": "200000",  
+    "validFrom": "2025-01-01T00:00:00.000Z",
+    "validTo": "2025-12-31T23:59:59.000Z",
+    "usageLimit": "1",
+    "applicableProducts": null
+}

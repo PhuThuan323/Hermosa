@@ -44,7 +44,7 @@ router.post('/signup', async (req,res)=>{
       const newuser = new user({ email, otp, otpExpires, is_verified: false, signupMethod: "Username"});
       await newuser.save() 
       await sendotp(email, otp)
-      res.status(200).json({ status: "Successful", statuscode: 200, message: "Vui lòng kiểm tra OTP để lấy mã xác thực" });
+      res.status(200).json({ status: "Successful", message: "Vui lòng kiểm tra OTP để lấy mã xác thực" });
     }
     catch(err) {
       res.status(500).json({status: "Failed", message: "Lỗi hệ thống", detail: err.message})
