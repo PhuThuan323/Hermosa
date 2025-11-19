@@ -9,6 +9,9 @@ require('./config/passport_gg')
 require('./config/passport_fb')
 const User = require("./models/user");
 
+const cors = require('cors');
+app.use(cors()); 
+
 app.use(express.json());
 
 app.use(session({
