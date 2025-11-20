@@ -27,6 +27,9 @@ export default function Sidebar() {
         <NavLink to="/products" className={({isActive}) =>`${linkBase} ${isActive ? 'bg-primary text-primaryFg shadow-soft' : 'text-ink hover:bg-primary/10 hover:text-primary'}`}>
           {icon("M4 7l8-4 8 4v10l-8 4-8-4z")} <span>Products</span>
         </NavLink>
+        <NavLink to="/staff" className={({isActive}) =>`${linkBase} ${isActive ? 'bg-primary text-primaryFg shadow-soft' : 'text-ink hover:bg-primary/10 hover:text-primary'}`}>
+          {icon("M12 12h.01 M16 6V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2 M22 13a18.15 18.15 0 0 1-20 0 M2 6h20v14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z")} <span>Staff Managent</span>
+        </NavLink>
       </nav>
     </aside>
   )

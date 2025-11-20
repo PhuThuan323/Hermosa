@@ -8,6 +8,8 @@ import Orders from './pages/Orders'
 import Customers from './pages/Customers'
 import Products from './pages/Products'
 import CustomerForm from "./components/CustomerForm";
+import Staff from "./pages/Staff";
+
 
 export default function App() {
   return (
@@ -31,6 +33,7 @@ export default function App() {
                     <Route path="/customers/add" element={<CustomerForm />} />
                     <Route path="/customers/edit/:id" element={<CustomerForm isEdit />} />
                     <Route path="*" element={<div className="text-ink">Not Found</div>} />
+                    <Route path="/staff" element={<Staff />} />
                   </Routes>
                 </main>
               </div>
