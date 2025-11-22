@@ -47,7 +47,10 @@ app.use('/topping', toppingRoute)
 const voucherRoute = require('./api/vouchers')
 app.use('/voucher', voucherRoute)
 
-// const notificationRoute = require('./api/notifications')
-// app.use('/notification', notificationRoute)
+const notificationRoute = require('./api/notifications')
+app.use('/notification', notificationRoute)
+
+const deliverAddressRoute = require('./api/addresses')
+app.use('/address', deliverAddressRoute)
 
 app.listen(port, () => console.log("Server running on port 8000"));

@@ -249,7 +249,7 @@ Content-Type: application/json
 GET http://localhost:8000/cart/view-and-caculate-total-money?userID=68f79841532b8744f537b2e3
 
 ### 
-POST http://localhost:8000/voucher/create
+POST http://13.250.179.85/voucher/create
 Content-Type: application/json
 
 {
@@ -262,3 +262,6 @@ Content-Type: application/json
     "usageLimit": "1",
     "applicableProducts": null
 }
+
+###
+GET http://localhost:8000/address/suggestion?input=39/37 Hoàng Bật Đạt,

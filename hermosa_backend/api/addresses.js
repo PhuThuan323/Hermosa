@@ -1,0 +1,134 @@
+const express = require('express')
+const router = express.Router()
+const dotenv = require('dotenv')
+const mongoose = require('mongoose')
+const Add = require('../models/address')
+const axios = require('axios')
+dotenv.config();
+
+//Gọi 
+router.get('/suggestion', async (req, res) => {
+    try {
+        const input = req.query.input;
+
+        const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(input)}.json?autocomplete=true&limit=5&language=vi&access_token=${process.env.MAPBOX_ACCESS_TOKEN}`;
+
+        const response = await axios.get(url);
+
+        const suggestions = response.data.features.map(item => ({
+            name: item.place_name,
+            street: item.text,
+            ward: item.context?.find(v => v.id.includes('place'))?.text || "",
+            district: item.context?.find(v => v.id.includes('district'))?.text || "",
+            city: item.context?.find(v => v.id.includes('region'))?.text || "",
+            country: item.context?.find(v => v.id.includes('country'))?.text || "",
+            lat: item.geometry.coordinates[1],
+            lon: item.geometry.coordinates[0],
+        }));
+
+        return res.json({ message: "Lấy địa chỉ gợi ý thành công", data: suggestions });
+    } catch (err) {
+        return res.status(500).json({ status: "error", message: err.message });
+    }
+});
+// THÊM ĐỊA CHỈ MỚI
+
+router.post('/add', async (req, res) => {
+    try {
+        const { name, userID, addressDetail, phone } = req.body;
+        let user = await Add.findOne({ userID });
+        if (!user) {
+            user = new Add({
+                userID, deliverInformation: [] });
+        }
+        const addressID = 'ADD' + (user.deliverInformation.length + 1);
+
+        user.deliverInformation.push({
+            name,
+            addressID,
+            addressDetail: {
+                street: addressDetail.street,
+                ward: addressDetail.ward,
+                district: addressDetail.district,
+                city: addressDetail.city,
+                country: addressDetail.country
+            },
+            phone
+        });
+
+        await user.save();
+        return res.status(200).json({ 
+            message: "Lưu địa chỉ thành công!", 
+            data: user 
+        });
+    } catch (err) {
+        return res.status(500).json({ message: "Lỗi hệ thống", details: err.message });
+    }
+});
+
+
+// LẤY TẤT CẢ ĐỊA CHỈ
+router.get('/show', async (req, res) => {
+    try {
+        const { userID } = req.query;
+        const user = await Add.findOne({ userID });
+        if (!user) {
+            return res.status(404).json({ message: "Không tìm thấy user" });
+        }
+        res.status(200).json({
+            message: "Lấy danh sách địa chỉ thành công",
+            data: user.deliverInformation
+        });
+
+    } catch (err) {
+        return res.status(500).json({ message: "Lỗi hệ thống", details: err.message });
+    }
+});
+
+// XÓA ĐỊA CHỈ
+router.post('/delete', async (req, res) => {
+    try {
+        const { userID, addressID } = req.body;
+        const result = await Add.findOne({ userID });
+        if (!result) { return res.status(404).json({ message: "User không tồn tại" }); }
+        result.deliverInformation = result.deliverInformation.filter( item => item.addressID !== addressID)
+        await result.save();
+        return res.status(200).json({
+            message: "Xóa địa chỉ thành công",
+            data: result.deliverInformation
+        });
+
+    } catch (err) {
+        return res.status(500).json({ message: "Không thể xóa địa chỉ", details: err.message });
+    }
+});
+
+
+// CẬP NHẬT ĐỊA CHỈ
+router.put('/update', async (req, res) => {
+    try {
+        const { name, userID, addressID, addressDetail, phone } = req.body;
+        const user = await Add.findOne({ userID });
+        if (!user) {
+            return res.status(404).json({ message: "User không tồn tại" });
+        }
+        const item = user.deliverInformation.find(i => i.addressID === addressID);
+        if (!item) {
+            return res.status(404).json({ message: "Không tìm thấy địa chỉ" });
+        }
+        item.name = name;
+        item.phone = phone;
+        item.addressDetail = {
+            street: addressDetail.street,
+            ward: addressDetail.ward,
+            district: addressDetail.district,
+            city: addressDetail.city,
+            country: addressDetail.country
+        };
+        await user.save();
+        return res.status(200).json({ message: "Cập nhật địa chỉ giao hàng thành công", data: user });
+    } catch (err) {
+        return res.status(500).json({ message: "Không thể cập nhật địa chỉ", details: err.message });
+    }
+});
+module.exports = router
