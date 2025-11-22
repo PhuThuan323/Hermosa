@@ -16,9 +16,9 @@ jobs:
           key: ${{ secrets.DEPLOY_KEY }}
           port: 22
           script: |
-            cd ./HermosaCoffee/hermosa_backend
+            cd ./Hermosa/hermosa_backend
             git fetch origin
             git checkout main
             git pull
             npm install
-            pm2 start server.js --name "HermosaCoffee"
+            pm2 restart HermosaCoffee
