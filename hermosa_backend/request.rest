@@ -196,11 +196,30 @@ Content-Type: application/json
     "orderID": "ORD-1762739684875"
 }
 ###
-POST http://13.250.179.85/payment-momo/create-payment-momo
+POST http://localhost:8000/payment-momo/create-payment-momo
 Content-Type: application/json
 
 {
-    "orderID": "ORD-1762739684875"
+    "orderID": "ORD-1761275648168"
+}
+###
+POST http://localhost:8000/payment-momo/momo-notify
+Content-Type: application/json
+
+{
+  "partnerCode": "MOMO",
+  "orderId": "ORD-1761275648168-1700000000000",
+  "requestId": "MOMO1700000000000",
+  "amount": "700000",
+  "orderInfo": "Paying your order: ORD-1761275648168 by Momo",
+  "orderType": "momo_wallet",
+  "transId": "123456789",
+  "resultCode": 0,
+  "message": "Successful.",
+  "payType": "qr",
+  "responseTime": 1700000001000,
+  "extraData": "",
+  "signature": "a900d9b3709fe0762d7546b2ba77618f8a45a0961a04aaeb06d9a8f08f1506a9"
 }
 
 
