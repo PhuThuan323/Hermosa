@@ -16,10 +16,10 @@ router.post('/create-payment-momo', async (req, res)=>{
     if (!findOrder) return res.status(404).json({ message: 'Không tìm thấy đơn hàng' });
         
         var partnerCode = "MOMO";
-        var accessKey = "F8BBA842ECF85";
-        var secretkey = "K951B6PE1waDMi640xX08PD3vg6EkVlz";
+        var accessKey = process.env.MOMO_ACCESS_KEY;
+        var secretkey = process.env.MOMO_SECRET_KEY;
         var requestId = partnerCode + new Date().getTime();
-        var orderId = requestId;
+        var orderId = orderID;
         var orderInfo = "Paying your order: " + orderID + " by Momo"; //nội dung giao dịch
         var redirectUrl = process.env.MOMO_REDIRECT_URL; 
         var ipnUrl = "http://13.250.179.85/payment-momo/momo-notify";
@@ -109,7 +109,7 @@ router.post('/momo-notify', async (req, res) => {
       "&resultCode=" + resultCode +
       "&transId=" + transId;
 
-    const checkSignature = crypto.createHmac('sha256', secretKey)
+    const checkSignature = crypto.createHmac('sha256', process.env.MOMO_SECRET_KEY)
       .update(rawSignature)
       .digest('hex');
 
@@ -118,14 +118,11 @@ router.post('/momo-notify', async (req, res) => {
     }
 
     if (resultCode === 0) {
-      findOneAndUpdate(
-        { orderID: orderId },
-        {
-          paymentStatus: "done",
-          payingIn: new Date()
-        },
-        { new: true }
-    )}
+      const result = await order.findOne({orderID: orderId})
+      result.paymentStatus = "done"
+      result.payingIn = Date.now()
+      await result.save()
+    }
   } catch (error) {
     console.error("Callback error:", error);
     return res.status(500).json({ message: "Server error", error });
@@ -142,7 +139,6 @@ router.get('/confirm', async(req,res)=>{
             status: findOrder.paymentStatus,
             method: findOrder.paymentMethod,
             time: findOrder.payingIn,
-            
         });
     }
     catch{
