@@ -131,4 +131,11 @@ router.put('/update', async (req, res) => {
         return res.status(500).json({ message: "Không thể cập nhật địa chỉ", details: err.message });
     }
 });
+
+//Tính phí giao hàng trong bán kính 5km được miễn phí, 6km là 15k, từ 7 đến dưới 10km cộng thêm mỗi km 10k, từ 11 đến 20km (mỗi km tăng thêm 15k)
+//Trên 20km không nhận giao hàng
+
+
+//Tự động tìm và điền địa chỉ hiện tại của người dùng
+
 module.exports = router

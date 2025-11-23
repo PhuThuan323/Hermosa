@@ -22,7 +22,7 @@ router.post('/create-payment-momo', async (req, res)=>{
         var orderId = requestId;
         var orderInfo = "Paying your order: " + orderID + " by Momo"; //nội dung giao dịch
         var redirectUrl = process.env.MOMO_REDIRECT_URL; 
-        var ipnUrl = "http:/localhost:8000/payment/momo-notify";
+        var ipnUrl = "http://13.250.179.85/payment-momo/momo-notify";
         // var ipnUrl = redirectUrl = "https://webhook.site/454e7b77-f177-4ece-8236-ddf1c26ba7f8";
         var amount = findOrder.totalInvoice.toString();
         var requestType = "captureWallet"
@@ -118,15 +118,14 @@ router.post('/momo-notify', async (req, res) => {
     }
 
     if (resultCode === 0) {
-      await order.findOneAndUpdate(
+      findOneAndUpdate(
         { orderID: orderId },
-        { paymentStatus: "done", payingIn: new Date() },
+        {
+          paymentStatus: "done",
+          payingIn: new Date()
+        },
         { new: true }
-      );
-      return res.status(200).json({ message: "Payment successful", detail: message });
-    } else {
-      return res.status(400).json({ message: "Payment failed", detail: message });
-    }
+    )}
   } catch (error) {
     console.error("Callback error:", error);
     return res.status(500).json({ message: "Server error", error });
