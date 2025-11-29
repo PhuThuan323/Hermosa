@@ -6,7 +6,11 @@ const orderSchema = new Schema({
     status: { type: String, enum:["pending","confirm","deliver", "done"]},
     doneIn: Date,
     userID: {type: String, ref: "User", required: true},
+
     totalInvoice: {type: Number, default: 0},
+    totalInvoiceAfterVoucher: {type: Number, default: 0},
+    voucherCodeApply: {type: String, default: null},
+    
     products: [],
     createAt: {type: Date, default: Date.now},
 

@@ -10,7 +10,6 @@ const voucherSchema = new Schema({
     validFrom: {type: Date, required: true},
     validTo: {type: Date, required: true},
     usageLimit: {type: Number, default: null}, // null là không có giới hạn
-    applicableProducts: [{type: String}], // Mảng chứa các productID áp dụng voucher
     createdAt: {type: Date, default: Date.now},
     totalOfUsage: {type: Number, default: 0},
 });

@@ -2,11 +2,11 @@ const express = require('express')
 const router = express.Router()
 const dotenv = require('dotenv')
 const mongoose = require('mongoose')
-const Add = require('../models/address')
+const add = require('../models/address')
 const axios = require('axios')
 dotenv.config();
 
-//Gọi 
+//Gợi ý địa chỉ khi người dùng nhập vào ô tìm kiếm địa chỉ
 router.get('/suggestion', async (req, res) => {
     try {
         const input = req.query.input;
@@ -31,17 +31,17 @@ router.get('/suggestion', async (req, res) => {
         return res.status(500).json({ status: "error", message: err.message });
     }
 });
-// THÊM ĐỊA CHỈ MỚI
 
+// THÊM ĐỊA CHỈ MỚI - Lưu địa chỉ vào cơ sở dữ liệu 
 router.post('/add', async (req, res) => {
     try {
-        const { name, userID, addressDetail, phone } = req.body;
-        let user = await Add.findOne({ userID });
+        const { name, userID, addressDetail, phone, type } = req.body;
+        let user = await add.findOne({userID});
         if (!user) {
-            user = new Add({
+            user = new add({
                 userID, deliverInformation: [] });
         }
-        const addressID = 'ADD' + (user.deliverInformation.length + 1);
+        const addressID = `ADDR-${Date.now()}`;
 
         user.deliverInformation.push({
             name,
@@ -53,7 +53,8 @@ router.post('/add', async (req, res) => {
                 city: addressDetail.city,
                 country: addressDetail.country
             },
-            phone
+            phone,
+            type
         });
 
         await user.save();
@@ -62,22 +63,23 @@ router.post('/add', async (req, res) => {
             data: user 
         });
     } catch (err) {
-        return res.status(500).json({ message: "Lỗi hệ thống", details: err.message });
+        return res.status(500).json({ message: "Không thể lưu địa chỉ vào cơ sở dữ liệu", details: err.message });
     }
 });
 
 
-// LẤY TẤT CẢ ĐỊA CHỈ
+// LẤY TẤT CẢ ĐỊA CHỈ lọc theo type 
 router.get('/show', async (req, res) => {
     try {
-        const { userID } = req.query;
-        const user = await Add.findOne({ userID });
+        const { userID, type } = req.query;
+        const user = await add.findOne({ userID });
         if (!user) {
             return res.status(404).json({ message: "Không tìm thấy user" });
         }
+        const filteredAddresses = type ? user.deliverInformation.filter(addr => addr.type === type) : user.deliverInformation;
         res.status(200).json({
-            message: "Lấy danh sách địa chỉ thành công",
-            data: user.deliverInformation
+            message: `Lấy danh sách địa chỉ loại ${type} của user ${userID} thành công`,
+            data: filteredAddresses
         });
 
     } catch (err) {
@@ -86,10 +88,10 @@ router.get('/show', async (req, res) => {
 });
 
 // XÓA ĐỊA CHỈ
-router.post('/delete', async (req, res) => {
+router.delete('/delete', async (req, res) => {
     try {
         const { userID, addressID } = req.body;
-        const result = await Add.findOne({ userID });
+        const result = await add.findOne({ userID });
         if (!result) { return res.status(404).json({ message: "User không tồn tại" }); }
         result.deliverInformation = result.deliverInformation.filter( item => item.addressID !== addressID)
         await result.save();
@@ -107,8 +109,8 @@ router.post('/delete', async (req, res) => {
 // CẬP NHẬT ĐỊA CHỈ
 router.put('/update', async (req, res) => {
     try {
-        const { name, userID, addressID, addressDetail, phone } = req.body;
-        const user = await Add.findOne({ userID });
+        const { name, userID, addressID, addressDetail, phone, type } = req.body;
+        const user = await add.findOne({ userID });
         if (!user) {
             return res.status(404).json({ message: "User không tồn tại" });
         }
@@ -116,15 +118,16 @@ router.put('/update', async (req, res) => {
         if (!item) {
             return res.status(404).json({ message: "Không tìm thấy địa chỉ" });
         }
-        item.name = name;
-        item.phone = phone;
+        item.name = name
+        item.phone = phone
         item.addressDetail = {
             street: addressDetail.street,
             ward: addressDetail.ward,
             district: addressDetail.district,
             city: addressDetail.city,
             country: addressDetail.country
-        };
+        }
+        item.type = type
         await user.save();
         return res.status(200).json({ message: "Cập nhật địa chỉ giao hàng thành công", data: user });
     } catch (err) {

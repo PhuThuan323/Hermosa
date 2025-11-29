@@ -5,6 +5,7 @@ const dotenv = require('dotenv')
 const voucher = require('../models/voucher')
 const voucherUsage = require('../models/voucherUsage')
 const order = require('../models/order')
+const cart = require('../models/cart')
 dotenv.config();
 //---------------------TẠO VOUCHER MỚI-----------------------
 router.post('/create', async (req,res)=>{
@@ -52,7 +53,7 @@ router.delete('/delete', async (req,res)=>{
     }
 })
 //Thống kê số lượt sử dụng của tất cả voucher
-router.get('total-of-usage', async (req,res)=>{
+router.get('/total-of-usage', async (req,res)=>{
     try{
         return res.status(200).json({message: 'Thống kê số lượt sử dụng voucher thành công', 
             data: await voucher.find({}, {voucherCode:1, totalOfUsage:1, _id:0})} )
@@ -62,20 +63,46 @@ router.get('total-of-usage', async (req,res)=>{
     }
 })
 
-//Lấy những voucher kahr dụng ứng với từng người dùng 
-router.post('/apply', async (req,res)=>{
-    try{
-        const {cartTotal, userID} = req.body
-        const now = new Date()
-        const usedVouchers = await voucherUsage.find({userID}).distinct('voucherCode')
-        const fVoucher = await voucher.find({validFrom: {$lte: now}, validTo: {$gte: now},
-             minPurchaseAmount: {$lte: cartTotal}, usageLimit: {$gte: usedVouchers}})
-        return res.status(200).json({message: 'Lấy voucher có thể áp dụng thành công', data: fVoucher}  )
+//Lấy những voucher khả dụng ứng với đơn hàng hiện tại của người dùng
+router.post('/suggestion', async (req, res) => {
+    try {
+        const {userID} = req.body;
+        const fCart = await cart.findOne({userID});
+        const now = Date.now();
+        const money = fCart.totalMoney;
+        let fUser = await voucherUsage.findOne({userID});
+        if(!fUser){
+            fUser = await voucherUsage.create({
+                userID,
+                voucherUse: []
+            });
+        }
+        const available = await voucher.find({
+            validFrom: {$lte: now},
+            validTo: {$gte: now},
+            minPurchaseAmount: {$lte: money}
+        }).lean();
+        const usableVoucher = [];
+        for (let i of available) {
+            const usageList = fUser?.voucherUse || [];
+            const fUsage = usageList.find(v => String(v.voucherCode).trim() === String(i.voucherCode).trim());
+            const useTotal = fUsage?.sumofUse ?? 0
+            const maxUsage = i.usageLimit
+            if (useTotal < maxUsage) {
+                usableVoucher.push(i);
+            }
+        }
+
+        return res.status(200).json({ message: "Lấy voucher khả dụng thành công", data: usableVoucher });
+
+    } catch (err) {
+        return res.status(500).json({
+            message: 'Không thể lấy danh sách voucher khả dụng cho người dùng',
+            details: err.message
+        });
     }
-    catch(err){
-        return res.status(500).json({message: 'Lỗi hệ thống', details: err.message})
-    }
-})
+});
+
 //Xem chi tiết một voucher
 router.get('/detail', async (req,res)=>{
     try{
@@ -87,19 +114,13 @@ router.get('/detail', async (req,res)=>{
         return res.status(500).json({message: "Lỗi hệ thống", details: err.message})
     }
 })
-//Áp dụng voucher bất kỳ (Bổ sung vào api đã thanh toán)
+
+//Áp dụng một voucher (voucher này trong mớ suggest đã được suggest trước đó) 
 router.put('/apply', async (req,res)=>{
     try{
-        const {voucherCode, orderID, userID} = req.body
+        const {voucherCode, orderID} = req.body
         const fVoucher = await voucher.findOne({voucherCode})
-        if(!fVoucher){
-            return res.status(404).json({message: 'Voucher không tồn tại'})
-        }
         const fOrder = await order.findOne({orderID})
-        if(!fOrder){
-            return res.status(404).json({message: 'Đơn hàng không tồn tại'})
-        }
-        //Cập nhật tổng hóa đơn sau khi áp dụng voucher
         let discountAmount = 0
         if(fVoucher.discountType === 'percentage'){
             discountAmount = fOrder.totalInvoice * (fVoucher.discountValue / 100)
@@ -107,46 +128,117 @@ router.put('/apply', async (req,res)=>{
         else if(fVoucher.discountType === 'fixed'){
             discountAmount = fVoucher.discountValue
         }
-        fOrder.totalInvoiceAfterVoucher = fOrder.totalInvoice - discountAmount
-        await fOrder.save()
-        //Ghi nhận việc sử dụng voucher
-        const fUserUsage = await findOne({userID})
-        if(!fUserUsage){
-            const newUsage = new voucherUsage({
-                userID,
-                voucherUse: { voucherCode, useAt: Date.now() }
-            })
-            await newUsage.save()
-        }
-        else if(fUserUsage){
-            fUserUsage.voucherUse.push({voucherCode, usedAt: Date.now()})
-        }
-        //Cập nhật tổng số lượt sử dụng voucher
-        fVoucher.totalOfUsage += 1
-        await fVoucher.save()
+        
+        let totalafterVoucher = fOrder.totalInvoice - discountAmount
+        const updatedOrder = await order.findOneAndUpdate(
+            { orderID },
+            { $set: 
+                { totalInvoiceAfterVoucher: totalafterVoucher, 
+                    voucherCodeApply: voucherCode
+                } 
+            }, 
+            { new: true } 
+        )
+
+        return res.status(200).json({message: "Đã cập nhật giá tiền sau khi áp dụng voucher thành công", data: updatedOrder})
     }
     catch(err){
-        res.status(500).json({message: "Lỗi hệ thống", details: err.message})
+        return res.status(500).json({message: "Lỗi hệ thống", details: err.message})
     }
 })
 
-//Tự động áp dụng voucher khi người dùng vừa khởi tạo đơn hàng xong, voucher có lợi nhất cho người dùng 
-router.put('/auto-apply', async (req,res)=>{
+//Xác nhận sử dụng voucher (khi đơn hàng hoàn tất)
+router.put('/confirm-use', async (req,res)=>{
     try{
-        const { orderID } = req.body
-        const now = new Date()
+        const { voucherCode, orderID } = req.body
         const fOrder = await order.findOne({orderID})
-        const available = await voucher.find({validTo: {$lte: now}, validfrom: {$gte: now}})
+        const fVoucher = await voucher.findOne({voucherCode})
+        let user = fOrder.userID
+        //Cập nhật nngười dùng đã sử dụng voucher nếu như họ đã thanh toán thành công
+        //Nếu không thanh toán thành công thì chưa update
+        if(fOrder.paymentStatus === "done"){
+            const fUserUsage = await voucherUsage.findOne({userID: user})
+            if(!fUserUsage){
+                const newUsage = new voucherUsage({
+                    userID: user,
+                    voucherUse: { voucherCode, useAt: Date.now() },
+                    sumofUse: sumofUse + 1
+                })
+                await newUsage.save()
+            }
+            else if(fUserUsage){
+                fUserUsage.voucherUse.push({voucherCode, usedAt: Date.now()})
+            }
+            //Cập nhật tổng số lượt sử dụng voucher
+            fVoucher.totalOfUsage += 1
+            await fVoucher.save()
+            res.status(200).json({message: "Xác nhận sử dụng voucher thành công", data: fUserUsage})
+        }
+        else{
+            return res.status(400).json({message: "Đơn hàng chưa được thanh toán, không thể xác nhận sử dụng voucher"})
+        }
+    }
+    catch(err){
+        return res.status(500).json({message: "Không thể cập nhật lượt sử dụng voucher", details: err.message})
+    }
+})
+        
+
+//Tự động áp dụng voucher khi người dùng vừa khởi tạo đơn hàng xong, voucher có lợi nhất cho người dùng 
+router.put('/auto-apply', async (req, res) => {
+    try {
+        const { orderID } = req.body
+        const fOrder = await order.findOne({ orderID })
+        let findUserID = fOrder.userID
+        let fUser = await voucherUsage.findOne({userID: findUserID});
+        if (!fOrder) {
+            return res.status(404).json({ message: "Không tìm thấy đơn hàng" });
+        } 
+        if(!fUser){
+            fUser = await voucherUsage.create({
+                userID,
+                voucherUse: []
+            });
+        }
+        let now = new Date();
+        // Lấy voucher hợp lệ theo thời gian + điều kiện tối thiểu
+        const available = await voucher.find({
+            validFrom: { $lte: now },
+            validTo: { $gte: now },
+            minPurchaseAmount: { $lte: fOrder.totalInvoice }
+        }).lean();
         if (available.length === 0) {
             return res.status(200).json({
-                message: "Không có voucher phù hợp",
+                message: "Hiện tại không có voucher phù hợp",
                 bestVoucher: null,
                 discountAmount: 0
             });
         }
+
+        // Lọc voucher còn lượt sử dụng
+        const usableVoucher = [];
+
+        for (let v of available) {
+            const usageList = fUser.voucherUse || [];
+            const usage = usageList.find(u => String(u.voucherCode).trim() === String(v.voucherCode).trim());
+            const usedCount = usage?.sumofUse ?? 0;
+            if (usedCount < v.usageLimit) {
+                usableVoucher.push(v);
+            }
+        }
+        
+        if (usableVoucher.length === 0) {
+            return res.status(200).json({
+                message: "Tất cả voucher đã dùng hết lượt",
+                bestVoucher: null,
+                discountAmount: 0
+            });
+        }
+
         let bestVoucher = null;
         let maxDiscount = 0;
-        available.forEach(v => {
+
+        usableVoucher.forEach(v => {
             let discount = 0;
 
             if (v.discountType === "percentage") {
@@ -154,59 +246,97 @@ router.put('/auto-apply', async (req,res)=>{
             } else if (v.discountType === "fixed") {
                 discount = v.discountValue;
             }
+
             if (discount > maxDiscount) {
                 maxDiscount = discount;
                 bestVoucher = v;
             }
         });
         if (!bestVoucher) {
-            return res.json({
-                message: "Không tìm được voucher có lợi",
+            return res.status(200).json({
+                message: "Không tìm được voucher phù lợi nhất",
                 bestVoucher: null,
                 discountAmount: 0
             });
         }
+
+        // Cập nhật đơn hàng
         fOrder.totalInvoiceAfterVoucher = fOrder.totalInvoice - maxDiscount;
-        await fOrder.save()
-         res.json({
+        fOrder.voucherCodeApply = bestVoucher.voucherCode;
+        await fOrder.save();
+
+        return res.json({
             message: "Đã tự động áp dụng voucher tốt nhất",
             bestVoucher,
             discountAmount: maxDiscount,
-            newTotal: fOrder.totalInvoiceAfterVoucher
+            data: fOrder
         });
+
+    } catch (err) {
+        return res.status(500).json({ message: "Lỗi hệ thống", details: err.message });
     }
-    catch(err){
-         return res.status(500).json({message: 'Lỗi hệ thống', details: err.message})
-    }
-})
+});
+
 //Liệt kê tất cả voucher đang trong thời gian khả dụng
-router.get('/available', async (req,res)=>{
+router.get('/available-admin', async (req,res)=>{
     try{
         const now = new Date()
-        const availableVouchers = await voucher.find({validFrom: {$gte: now}, validTo: {$lte: now}})
+        const availableVouchers = await voucher.find({validFrom: {$lte: now}, validTo: {$gte: now}})
         return res.status(200).json({message: 'Lấy danh sách voucher khả dụng thành công', data: availableVouchers})
     }
     catch(err){
         return res.status(500).json({message: 'Lỗi hệ thống', details: err.message})
     }
 })
+router.get('/available-user', async (req,res)=>{
+    try{
+        const {userID} = req.query 
+        let now = new Date();
+        const availableVouchers = await voucher.find({validFrom: {$lte: now}, validTo: {$gte: now}}).lean()
+        let fUser = await voucherUsage.findOne({userID});
+        if (availableVouchers.length === 0) {
+            return res.status(200).json({
+                message: "Hiện tại không có voucher phù hợp",
+                bestVoucher: null,
+                discountAmount: 0
+            });
+        }
+        const usableVoucher = [];
+
+        for (let v of availableVouchers) {
+            const usageList = fUser.voucherUse || [];
+            const usage = usageList.find(u => String(u.voucherCode).trim() === String(v.voucherCode).trim());
+            const usedCount = usage?.sumofUse ?? 0;
+            if (usedCount < v.usageLimit) {
+                usableVoucher.push(v);
+            }
+        }
+        
+        if (usableVoucher.length === 0) {
+            return res.status(200).json({message: "Tất cả voucher đã dùng hết lượt"});
+        }
+        return res.status(200).json({message: `Lấy danh sách voucher khả dụng cho user ${userID} thành công`, data: availableVouchers})
+    }
+    catch(err){
+        return res.status(500).json({message: 'Lấy danh sách voucher khả dụng cho user thất bại', details: err.message})
+    }
+})
 //Liệt kê tất cả các voucher đã hết hạn sử dụng
 router.get('/expired', async (req,res)=>{
     try{
         const now  =  new Date()
-        const expiredVocuhers = await voucher.find({validTo: {$lt: now}})
+        const expiredVocuhers = await voucher.find({validTo: {$lte: now}})
         return res.status(200).json({message: 'Lấy danh sách voucher đã hết hạn thành công', data: expiredVocuhers})
     }
     catch(err){
         return res.status(500).json({message: 'Lỗi hệ thống', details: err.message})
     }
 })
-//Cập nhật tình trạng voucher 
+//Cập nhật voucher 
 router.put('/update', async (req,res)=>{
     try{
-        const {voucherCode} = req.query
-        const {description,discountType,discountValue,
-            minPurchaseAmount,validFrom,validTo, usageLimit,applicableProducts} = req.body
+        const { voucherCode, description,discountType,discountValue,
+            minPurchaseAmount,validFrom,validTo, usageLimit} = req.body
         const  fVoucher = await voucher.findOne({voucherCode})
         if(!fVoucher){
             return res.status(404).json({message: 'Voucher không tồn tại'}) 
@@ -218,7 +348,6 @@ router.put('/update', async (req,res)=>{
         fVoucher.validFrom = validFrom
         fVoucher.validTo = validTo
         fVoucher.usageLimit = usageLimit
-        fVoucher.applicableProducts = applicableProducts
         await fVoucher.save()
         return res.status(200).json({message: 'Cập nhật voucher thành công', data: fVoucher})
     }
@@ -226,27 +355,61 @@ router.put('/update', async (req,res)=>{
         return res.status(500).json({message: 'Lỗi hệ thống', details: err.message})
     }
 })
-//Liệt kê tất cả voucher đẫ được người dùng sử dụng
-router.get('/list-all-used-voucher', async (req,res)=>{
-    try{
-        const { userID } = req.body
-        const fUser = voucherUsage.findOne({userID})
-        return res.status(200).json({message: "Lấy danh sách voucher đã sử dụng thành công", data: fUser.voucherUse })
+// Liệt kê tất cả voucher đã được người dùng sử dụng
+router.get('/list-all-used-voucher', async (req, res) => {
+    try {
+        const { userID } = req.query;
+        const fUser = await voucherUsage.findOne({ userID });
+        if (!fUser || fUser.voucherUse.length === 0) {
+            return res.status(200).json({
+                message: `User ${userID} chưa sử dụng voucher nào`,
+                data: []
+            });
+        }
+        return res.status(200).json({
+            message: `Lấy danh sách voucher đã sử dụng của user ${userID} thành công`,
+            data: fUser.voucherUse 
+        });
+
+    } catch (err) {
+        return res.status(500).json({ message: `Lấy danh sách voucher đã sử dụng của user ${userID} thất bại`, details: err.message});
     }
-    catch(err){
-        return res.status(500).json({message: 'Lỗi hệ thống', details: err.message })
+});
+
+//Tái hoạt động một voucher đã hết hạn
+router.put('/re-active', async (req, res) => {
+    try {
+        const { voucherCode, newValidFrom, newValidTo } = req.body;
+        if (!voucherCode || !newValidFrom || !newValidTo) {
+            return res.status(400).json({ message: "Thiếu dữ liệu gửi lên" });
+        }
+        const result = await voucher.findOne({ voucherCode });
+        if (!result) {
+            return res.status(404).json({ message: "Voucher không tồn tại" });
+        }
+        // Ép kiểu Date
+        const fromDate = new Date(newValidFrom);
+        const toDate = new Date(newValidTo);
+
+        if (fromDate >= toDate) {
+            return res.status(400).json({ message: "Ngày bắt đầu phải trước ngày kết thúc" });
+        }
+        // Cập nhật
+        result.validFrom = fromDate;
+        result.validTo = toDate;
+        await result.save();
+        return res.status(200).json({
+            message: "Tái hoạt động voucher thành công",
+            data: result
+        });
+
+    } catch (err) {
+        return res.status(500).json({
+            message: 'Không thể cập nhật lại voucher',
+            details: err.message 
+        });
     }
-})
-//Tái hoạt động một voucher đã hết hạng 
-router.put('/reapply', async (req, res)=>{
-    try{
-        const { voucherCode, newValidFrom, newValidTo } = req.body
-        const fVoucher = await voucher.findByIdAndUpdate({voucherCode, validfrom: newValidFrom, validTo: newValidTo })
-        return res.status(200).json({message: "Tái hoạt động một voucher đã hết hạn thành công", data: fVoucher})
-    }
-    catch(err){
-        return res.status(500).json({message: 'Lỗi hệ thống', details: err.message })
-    }
-})
+});
+
 
 module.exports = router
