@@ -47,13 +47,15 @@ router.post('/create', async (req,res)=>{
         status: "pending",
         userID,
         totalInvoice: total,
-        totalInvoiceAfterVoucher: totalInvoiceAfterVoucher + tipsforDriver,
+        totalInvoiceAfterVoucher,
+        totalInvoiceAfterShip,
         products: detailedItems,
         paymentMethod: paymentMethod,
         paymentStatus: paymentStatus,
         deliver: deliver,
         deliverAddress: deliverAddress,
         note: note,
+        tipsforDriver,
         createAt: Date.now()
     })
     await newOrder.save()

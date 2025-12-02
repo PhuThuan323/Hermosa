@@ -53,4 +53,7 @@ app.use('/notification', notificationRoute)
 const deliverAddressRoute = require('./api/addresses')
 app.use('/address', deliverAddressRoute)
 
+const deliverRoute = require('./api/deliver')
+app.use('/deliver', deliverRoute)
+
 app.listen(port, () => console.log("Server running on port 8000"));

@@ -7,13 +7,20 @@ const addressSchema = new Schema({
     {
       name: String,
       addressID: String,
-      addressDetail: [{
-        street: String,
-        ward: String,
-        district: String,
-        city: String,
-        country: String
-      }],  
+       addressDetail: {
+        street: { type: String },
+
+        ward: { type: String },
+        district: { type: String },
+        province: { type: String }, 
+        country: { type: String },
+
+        ghn: {
+          provinceID: { type: Number },
+          districtID: { type: Number }, 
+          wardCode: { type: String }
+        }
+      },
       phone: String,
       type: {type: String, enum: ['home', 'work', 'other'], default: 'home' }
     }

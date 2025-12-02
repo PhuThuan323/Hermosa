@@ -10,6 +10,7 @@ const orderSchema = new Schema({
     totalInvoice: {type: Number, default: 0},
     totalInvoiceAfterVoucher: {type: Number, default: 0},
     voucherCodeApply: {type: String, default: null},
+    totalInvoiceAfterShip: {type: Number, default: 0},
     
     products: [],
     createAt: {type: Date, default: Date.now},

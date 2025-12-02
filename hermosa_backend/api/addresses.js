@@ -4,6 +4,7 @@ const dotenv = require('dotenv')
 const mongoose = require('mongoose')
 const add = require('../models/address')
 const axios = require('axios')
+
 dotenv.config();
 
 //Gợi ý địa chỉ khi người dùng nhập vào ô tìm kiếm địa chỉ
@@ -20,7 +21,7 @@ router.get('/suggestion', async (req, res) => {
             street: item.text,
             ward: item.context?.find(v => v.id.includes('place'))?.text || "",
             district: item.context?.find(v => v.id.includes('district'))?.text || "",
-            city: item.context?.find(v => v.id.includes('region'))?.text || "",
+            province: item.context?.find(v => v.id.includes('region'))?.text || "",
             country: item.context?.find(v => v.id.includes('country'))?.text || "",
             lat: item.geometry.coordinates[1],
             lon: item.geometry.coordinates[0],
@@ -32,16 +33,68 @@ router.get('/suggestion', async (req, res) => {
     }
 });
 
-// THÊM ĐỊA CHỈ MỚI - Lưu địa chỉ vào cơ sở dữ liệu 
+
+//Thêm địa chỉ mới
 router.post('/add', async (req, res) => {
     try {
         const { name, userID, addressDetail, phone, type } = req.body;
-        let user = await add.findOne({userID});
-        if (!user) {
-            user = new add({
-                userID, deliverInformation: [] });
+        const provincesRes = await axios.post(
+            "https://online-gateway.ghn.vn/shiip/public-api/master-data/province",
+            {},
+            {
+                headers: { Token: process.env.GHN_TOKEN }
+            }
+        );
+        const provinces = provincesRes.data.data;
+
+        const province = provinces.find(
+            p => p.ProvinceName.toLowerCase().trim() === addressDetail.province.toLowerCase().trim()
+        );
+        if (!province) {
+            return res.status(400).json({ message: "Không tìm thấy mã tỉnh GHN!" });
         }
+        const districtsRes = await axios.post(
+            "https://online-gateway.ghn.vn/shiip/public-api/master-data/district",
+            { province_id: province.ProvinceID },
+            {
+                headers: { Token: process.env.GHN_TOKEN, "Content-Type": "application/json" }
+            }
+        );
+        const districts = districtsRes.data.data;
+        console.log("Districts:", districts.map(d => d.DistrictName));
+
+        const district = districts.find(
+            d => d.DistrictName.toLowerCase().trim() === addressDetail.district.toLowerCase().trim()
+        );
+        if (!district) {
+            console.error("Không tìm thấy quận GHN:", addressDetail.district);
+            return res.status(400).json({ message: "Không tìm thấy mã quận GHN!" });
+        }
+        const wardsRes = await axios.post(
+            "https://online-gateway.ghn.vn/shiip/public-api/master-data/ward",
+            { district_id: district.DistrictID },
+            {
+                headers: { Token: process.env.GHN_TOKEN }
+            }
+        );
+        const wards = wardsRes.data.data;
+
+        const ward = wards.find(
+            w => w.WardName.toLowerCase().trim() === addressDetail.ward.toLowerCase().trim()
+        );
+        if (!ward) {
+            console.error("Không tìm thấy phường GHN:", addressDetail.ward);
+            return res.status(400).json({ message: "Không tìm thấy mã phường GHN!" });
+        }
+        console.log("Tìm user trong DB:", userID);
+        let user = await add.findOne({ userID });
+        if (!user) {
+            console.log("User chưa tồn tại, tạo mới");
+            user = new add({ userID, deliverInformation: [] });
+        }
+
         const addressID = `ADDR-${Date.now()}`;
+        console.log("Tạo addressID:", addressID);
 
         user.deliverInformation.push({
             name,
@@ -50,20 +103,33 @@ router.post('/add', async (req, res) => {
                 street: addressDetail.street,
                 ward: addressDetail.ward,
                 district: addressDetail.district,
-                city: addressDetail.city,
-                country: addressDetail.country
+                province: addressDetail.province,
+                country: addressDetail.country,
+                ghn: {
+                    provinceID: province.ProvinceID,
+                    provinceName: province.ProvinceName,
+                    districtID: district.DistrictID,
+                    districtName: district.DistrictName,
+                    wardCode: ward.WardCode,
+                    wardName: ward.WardName
+                }
             },
             phone,
             type
         });
 
+        console.log("Saving address to DB...");
         await user.save();
-        return res.status(200).json({ 
-            message: "Lưu địa chỉ thành công!", 
-            data: user 
-        });
+        console.log("Lưu thành công!");
+
+        return res.status(200).json({ message: "Lưu địa chỉ thành công!", data: user });
+
     } catch (err) {
-        return res.status(500).json({ message: "Không thể lưu địa chỉ vào cơ sở dữ liệu", details: err.message });
+        console.error("ERROR:", err);
+        return res.status(500).json({
+            message: "Không thể lưu địa chỉ vào cơ sở dữ liệu",
+            details: err.response?.data || err.message
+        });
     }
 });
 
@@ -124,7 +190,7 @@ router.put('/update', async (req, res) => {
             street: addressDetail.street,
             ward: addressDetail.ward,
             district: addressDetail.district,
-            city: addressDetail.city,
+            province: addressDetail.province,
             country: addressDetail.country
         }
         item.type = type

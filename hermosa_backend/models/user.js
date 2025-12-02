@@ -10,7 +10,8 @@ const userSchema = new Schema({
     avatar: String,
     otp:String,
     otp_expire: Date,
-    is_verified: {type: Boolean, default: "false"}
+    is_verified: {type: Boolean, default: "false"},
+    fcmToken: {type: String, default: null}
 })
 
 module.exports = mongoose.model('User', userSchema);

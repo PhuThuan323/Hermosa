@@ -302,8 +302,53 @@ Content-Type: application/json
 ###
 GET http://localhost:8000/voucher/detail?voucherCode=VVQ9R93
 ###
-GET http://13.250.179.85/address/suggestion?input=39/37 Hoàng Bật Đạt,
+GET http://localhost:8000/address/suggestion?input=39/37 Hoàng Bật Đạt
 
+###
+POST http://localhost:8000/address/add
+Content-Type: application/json
+
+{
+    "name": "Nguyen Van A",
+    "userID": "68f79841532b8744f537b2e3",
+    "addressDetail": {
+        "street": "Hoàng Bật Đạt",
+        "ward": "Phường 15",
+        "district": "Quận Tân Bình",
+        "province": "Hồ Chí Minh",
+        "country": "Viet Nam"
+    },
+    "phone": "0987654321",
+    "type": "home"
+}
+###
+GET http://localhost:8000/address/show?userID=68f79841532b8744f537b2e3&type=home
+###
+DELETE http://localhost:8000/address/delete
+Content-Type: application/json
+
+{
+    "userID": "68f79841532b8744f537b2e3",
+    "addressID": "ADDR-1764440407727"
+}
+###
+PUT http://13.250.179.85/address/update
+Content-Type: application/json
+
+{
+    "name": "Duong Thi My Nhuy",
+    "userID": "68f79841532b8744f537b2e3",
+    "addressID": "ADDR-1764440407727",  
+    "addressDetail": {
+        "street": "789 Tran Hung Dao",
+        "ward": "Ward 1",
+        "district": "District 5",
+        "city": "Ho Chi Minh City",
+        "country": "Viet Nam"
+    },
+    "phone": "0123456789",
+    "type": "work"
+}
 ###
 PUT http://localhost:8000/voucher/apply
 Content-Type: application/json
@@ -348,4 +393,35 @@ Content-Type: application/json
 GET http://localhost:8000/voucher/available-admin
 
 ###
-GET http://localhost:8000/voucher/available-user?userID=690d58c681db5d6a42009e06
+PUT http://localhost:8000/voucher/re-active
+Content-Type: application/json
+
+{
+    "voucherCode": "VQIUTX1",
+    "newValidFrom": "2025-12-01T00:00:00.000Z",
+    "newValidTo": "2025-12-31T23:59:59.000Z"
+}
+###
+POST http://localhost:8000/notification/save-fcm-token
+Content-Type: application/json
+
+{
+    "userID": "68f7a3d843cf46022bfc9fa0",
+    "fcmToken": "fcm_token_example_123456"
+}
+
+###
+POST http://localhost:8000/notification/create
+Content-Type: application/json
+
+{
+    "title": "Trà sữa + bánh ngọt: cuối tuần ấm áp bên người thương",
+    "message": "Mua trà sữa để nhận ngay bánh ngọt thơm ngon, ưu đãi hấp dẫn chỉ có trong tuần này!"
+}
+###
+GET http://localhost:8000/notification/list-all
+
+###
+GET https://online-gateway.ghn.vn/shiip/public-api/master-data/province
+Token: a7f26326-ce64-11f0-9ca3-9e851f00bd99
+# Content-Type: application/json
