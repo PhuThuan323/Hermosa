@@ -20,14 +20,14 @@ router.post('/create', async (req, res) => {
         }
 
         var partnerCode = "MOMO";
-        var accessKey = process.env.MOMO_ACCESS_KEY
-        var secretkey = process.env.MOMO_SECRET_KEY
-        var requestId = partnerCode + new Date().getTime()
-        var orderId = requestId
-        var orderInfo = "Paying your order: " + orderID + " by Momo"
-        var redirectUrl = process.env.MOMO_REDIRECT_URL
-        var ipnUrl = "https://momo-test-123.loca.lt/momo/momo-notify"
-        var amount = findOrder.finalTotal.toString()
+        var accessKey = process.env.MOMO_ACCESS_KEY;
+        var secretkey = process.env.MOMO_SECRET_KEY;
+        var requestId = partnerCode + new Date().getTime();
+        var orderId = requestId;
+        var orderInfo = "Paying your order: " + orderID + " by Momo";
+        var redirectUrl = process.env.MOMO_REDIRECT_URL;
+        var ipnUrl = "https://13.250.179.85/momo/momo-notify"
+        var amount = findOrder.finalTotal.toString
         var requestType = "captureWallet"
         var extraData = "";
         orderIDGOC = orderID
