@@ -6,7 +6,7 @@ const order = require('../../models/order')
 const { VNPay, ignoreLogger, VnpLocale, dateFormat, ProductCode } = require('vnpay')
 
 //------------------ API TẠO THANH TOÁN VNPay ------------------
-router.post("/create-payment-vnpay", async(req,res)=>{
+router.post("/create", async(req,res)=>{
     try{
         const {orderID} = req.body
         const fOrder = await order.findOne({orderID})
