@@ -2,10 +2,10 @@ const express = require('express')
 const router = express.Router()
 const mongoose = require('mongoose')
 const dotenv = require('dotenv')
-const voucher = require('../models/voucher')
-const voucherUsage = require('../models/voucherUsage')
-const order = require('../models/order')
-const cart = require('../models/cart')
+const voucher = require('../../models/voucher')
+const voucherUsage = require('../../models/voucherUsage')
+const order = require('../../models/order')
+const cart = require('../../models/cart')
 dotenv.config();
 //---------------------TẠO VOUCHER MỚI-----------------------
 router.post('/create', async (req,res)=>{
@@ -120,7 +120,7 @@ router.put('/apply', async (req,res)=>{
     try{
         const {voucherCode, orderID} = req.body
         const fVoucher = await voucher.findOne({voucherCode})
-        const fOrder = await order.findOne({orderID})
+        let fOrder = await order.findOne({orderID})
         let discountAmount = 0
         if(fVoucher.discountType === 'percentage'){
             discountAmount = fOrder.totalInvoice * (fVoucher.discountValue / 100)
@@ -129,21 +129,22 @@ router.put('/apply', async (req,res)=>{
             discountAmount = fVoucher.discountValue
         }
         
-        let totalafterVoucher = fOrder.totalInvoice - discountAmount
-        const updatedOrder = await order.findOneAndUpdate(
-            { orderID },
+        fOrder = await order.findOneAndUpdate(
+            { orderID: fOrder.orderID },
             { $set: 
-                { totalInvoiceAfterVoucher: totalafterVoucher, 
-                    voucherCodeApply: voucherCode
+                { 
+                    voucherCodeApply: voucherCode,
+                    discountAmount: discountAmount
                 } 
             }, 
             { new: true } 
         )
-
-        return res.status(200).json({message: "Đã cập nhật giá tiền sau khi áp dụng voucher thành công", data: updatedOrder})
+        fOrder.finalTotal = fOrder.totalInvoice - fOrder.discountAmount + fOrder.deliveryFee + fOrder.tipsforDriver
+        await fOrder.save()
+        return res.status(200).json({message: "Áp dụng voucher thành công", data: fOrder})
     }
     catch(err){
-        return res.status(500).json({message: "Lỗi hệ thống", details: err.message})
+        return res.status(500).json({message: "Không thế áp dụng voucher", details: err.message})
     }
 })
 
@@ -182,100 +183,7 @@ router.put('/confirm-use', async (req,res)=>{
         return res.status(500).json({message: "Không thể cập nhật lượt sử dụng voucher", details: err.message})
     }
 })
-        
 
-//Tự động áp dụng voucher khi người dùng vừa khởi tạo đơn hàng xong, voucher có lợi nhất cho người dùng 
-router.put('/auto-apply', async (req, res) => {
-    try {
-        const { orderID } = req.body
-        const fOrder = await order.findOne({ orderID })
-        let findUserID = fOrder.userID
-        let fUser = await voucherUsage.findOne({userID: findUserID});
-        if (!fOrder) {
-            return res.status(404).json({ message: "Không tìm thấy đơn hàng" });
-        } 
-        if(!fUser){
-            fUser = await voucherUsage.create({
-                userID,
-                voucherUse: []
-            });
-        }
-        let now = new Date();
-        // Lấy voucher hợp lệ theo thời gian + điều kiện tối thiểu
-        const available = await voucher.find({
-            validFrom: { $lte: now },
-            validTo: { $gte: now },
-            minPurchaseAmount: { $lte: fOrder.totalInvoice }
-        }).lean();
-        if (available.length === 0) {
-            return res.status(200).json({
-                message: "Hiện tại không có voucher phù hợp",
-                bestVoucher: null,
-                discountAmount: 0
-            });
-        }
-
-        // Lọc voucher còn lượt sử dụng
-        const usableVoucher = [];
-
-        for (let v of available) {
-            const usageList = fUser.voucherUse || [];
-            const usage = usageList.find(u => String(u.voucherCode).trim() === String(v.voucherCode).trim());
-            const usedCount = usage?.sumofUse ?? 0;
-            if (usedCount < v.usageLimit) {
-                usableVoucher.push(v);
-            }
-        }
-        
-        if (usableVoucher.length === 0) {
-            return res.status(200).json({
-                message: "Tất cả voucher đã dùng hết lượt",
-                bestVoucher: null,
-                discountAmount: 0
-            });
-        }
-
-        let bestVoucher = null;
-        let maxDiscount = 0;
-
-        usableVoucher.forEach(v => {
-            let discount = 0;
-
-            if (v.discountType === "percentage") {
-                discount = fOrder.totalInvoice * (v.discountValue / 100);
-            } else if (v.discountType === "fixed") {
-                discount = v.discountValue;
-            }
-
-            if (discount > maxDiscount) {
-                maxDiscount = discount;
-                bestVoucher = v;
-            }
-        });
-        if (!bestVoucher) {
-            return res.status(200).json({
-                message: "Không tìm được voucher phù lợi nhất",
-                bestVoucher: null,
-                discountAmount: 0
-            });
-        }
-
-        // Cập nhật đơn hàng
-        fOrder.totalInvoiceAfterVoucher = fOrder.totalInvoice - maxDiscount;
-        fOrder.voucherCodeApply = bestVoucher.voucherCode;
-        await fOrder.save();
-
-        return res.json({
-            message: "Đã tự động áp dụng voucher tốt nhất",
-            bestVoucher,
-            discountAmount: maxDiscount,
-            data: fOrder
-        });
-
-    } catch (err) {
-        return res.status(500).json({ message: "Lỗi hệ thống", details: err.message });
-    }
-});
 
 //Liệt kê tất cả voucher đang trong thời gian khả dụng
 router.get('/available-admin', async (req,res)=>{

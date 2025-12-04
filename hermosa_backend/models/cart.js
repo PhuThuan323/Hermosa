@@ -4,8 +4,7 @@ const Schema = mongoose.Schema;
 const cartSchema = new Schema({
   userID: {type: String, ref: "User", required: true},
   totalMoney: {type: Number},
-  items: {
-    type: [
+  items: [
       {
         productID: {type: String, ref: "Menu",required: true },
         name: {type: String, ref:"Menu", required: true},
@@ -15,8 +14,7 @@ const cartSchema = new Schema({
         note: {type: String},
         subtotal: Number
       }
-    ],
-  }
+    ]
 });
 
 module.exports = mongoose.model('Cart', cartSchema);

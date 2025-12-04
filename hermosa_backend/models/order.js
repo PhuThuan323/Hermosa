@@ -4,25 +4,37 @@ const Schema = mongoose.Schema;
 const orderSchema = new Schema({
     orderID: String,
     status: { type: String, enum:["pending","confirm","deliver", "done"]},
-    doneIn: Date,
+    
     userID: {type: String, ref: "User", required: true},
 
-    totalInvoice: {type: Number, default: 0},
-    totalInvoiceAfterVoucher: {type: Number, default: 0},
+    //Giá tiền sau khi áp dụng voucher 
+    discountAmount: {type: Number, default: 0},
     voucherCodeApply: {type: String, default: null},
-    totalInvoiceAfterShip: {type: Number, default: 0},
-    
+
+    //Giá tiền sau khi cộng tiền phí vận chuyển
+    deliveryFee: {type: Number, default: 0},
+    tipsforDriver: {type: Number, default: 0},
+
+    //Giao hàng
+    deliverAddress: {type: String, default: null},
+    deliverIn: {type: Date, default:null},
+
+    //Sản phẩm có trong giỏ hàng
     products: [],
+    totalInvoice: {type: Number, default: 0},
+
+    //Thời gian các trạng thái đơn hàng
+    doneIn: {type: Date, default: null},
     createAt: {type: Date, default: Date.now},
 
-    paymentMethod: {type: String,enum:["momo", "cash", "vnpay"]},
+    //Phương thức thanh toán
+    paymentMethod: {type: String,enum:["momo", "cash", "vnpay"], default: "cash"},
     paymentStatus: {type: String,enum:["not_done", "done"]},
-    payingIn: Date,
+    payingIn: {type: Date, default:null},
 
-    deliver: {type: Boolean, default: false},
-    deliverAddress: {type: String, default: null},
-    deliverIn: Date,
-    tipsforDriver: {type: Number, default: 0},
+    //Tổng tiền 
+    finalTotal: {type:Number,default: null},
+
     note: {type: String, default:null},
 
     reviewofOrder: String,

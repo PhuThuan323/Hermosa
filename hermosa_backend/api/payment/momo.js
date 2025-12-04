@@ -2,18 +2,17 @@ const express = require('express')
 const router = express.Router()
 const dotenv = require('dotenv')
 const mongoose = require('mongoose')
-const order = require('../models/order')
+const order = require('../../models/order')
 const crypto = require('crypto')
 const axios = require('axios')
 dotenv.config()
 
 //----------------------------TẠO YÊU CẦU THANH TOÁN VỚI MOMO--------------------
 let orderIDGOC = 0
-router.post('/create-payment-momo', async (req, res) => {
+router.post('/create', async (req, res) => {
     try {
-        const { orderID, userID } = req.body
-        console.log("[CREATE PAYMENT] Request body:", req.body);
-
+        const { orderID } = req.body
+        let total = 0
         const findOrder = await order.findOne({ orderID })
         if (!findOrder) {
             console.log("[CREATE PAYMENT] Order not found:", orderID);
@@ -21,14 +20,14 @@ router.post('/create-payment-momo', async (req, res) => {
         }
 
         var partnerCode = "MOMO";
-        var accessKey = process.env.MOMO_ACCESS_KEY;
-        var secretkey = process.env.MOMO_SECRET_KEY;
-        var requestId = partnerCode + new Date().getTime();
-        var orderId = requestId;
-        var orderInfo = "Paying your order: " + orderID + " by Momo";
-        var redirectUrl = process.env.MOMO_REDIRECT_URL;
-        var ipnUrl = "http://13.250.179.85/payment-momo/momo-notify";
-        var amount = findOrder.totalInvoice.toString();
+        var accessKey = process.env.MOMO_ACCESS_KEY
+        var secretkey = process.env.MOMO_SECRET_KEY
+        var requestId = partnerCode + new Date().getTime()
+        var orderId = requestId
+        var orderInfo = "Paying your order: " + orderID + " by Momo"
+        var redirectUrl = process.env.MOMO_REDIRECT_URL
+        var ipnUrl = "https://momo-test-123.loca.lt/momo/momo-notify"
+        var amount = findOrder.finalTotal.toString()
         var requestType = "captureWallet"
         var extraData = "";
         orderIDGOC = orderID
@@ -86,7 +85,7 @@ router.post('/create-payment-momo', async (req, res) => {
 
     } catch (error) {
         console.error("[CREATE PAYMENT] Error:", error);
-        return res.status(500).json({ message: "Server error", error });
+        return res.status(500).json({ message: "Server error", detail: error.message });
     }
 });
 
@@ -149,13 +148,11 @@ router.post('/momo-notify', async (req, res) => {
         } else {
           console.log("[MOMO NOTIFY] Cannot find order for:", originalOrderId);
         }
-}
-
-        res.status(200).json({ message: "OK" });
-
+        res.status(200).json({ message: "OK", "data": result });
+        }
     } catch (error) {
         console.error("[MOMO NOTIFY] Callback error:", error);
-        return res.status(500).json({ message: "Server error", error });
+        return res.status(500).json({ message: "Server error", detail: error.message });
     }
 });
 

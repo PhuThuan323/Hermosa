@@ -302,7 +302,7 @@ Content-Type: application/json
 ###
 GET http://localhost:8000/voucher/detail?voucherCode=VVQ9R93
 ###
-GET http://localhost:8000/address/suggestion?input=39/37 Hoàng Bật Đạt
+GET http://localhost:8000/address/suggestion?input=Khu phố 34, Phường Linh Xuân, Thành phố Thủ Đức, Thành phố Hồ Chí Minh
 
 ###
 POST http://localhost:8000/address/add
@@ -312,9 +312,9 @@ Content-Type: application/json
     "name": "Nguyen Van A",
     "userID": "68f79841532b8744f537b2e3",
     "addressDetail": {
-        "street": "Hoàng Bật Đạt",
-        "ward": "Phường 15",
-        "district": "Quận Tân Bình",
+        "street": "Hàn Thuyên",
+        "ward": "Phường Linh Xuân",
+        "district": "Quận Thủ Đức",
         "province": "Hồ Chí Minh",
         "country": "Viet Nam"
     },
@@ -409,6 +409,7 @@ Content-Type: application/json
     "userID": "68f7a3d843cf46022bfc9fa0",
     "fcmToken": "fcm_token_example_123456"
 }
+###
 
 ###
 POST http://localhost:8000/notification/create
@@ -422,6 +423,112 @@ Content-Type: application/json
 GET http://localhost:8000/notification/list-all
 
 ###
-GET https://online-gateway.ghn.vn/shiip/public-api/master-data/province
+GET http://localhost:8000/address/show
+
+
+###
+GET https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/province
 Token: a7f26326-ce64-11f0-9ca3-9e851f00bd99
-# Content-Type: application/json
+Content-Type: application/json
+
+###
+POST http://localhost:8000/deliver/calculate-fee
+Content-Type: application/json
+
+{
+    "orderID": "ORD-1761275648168",
+    "addressID": "ADDR-1764562812720"
+}
+###
+POST http://localhost:8000/cart/add
+Content-Type: application/json
+
+{
+    "userID": "68f79841532b8744f537b2e3", 
+    "productID": "C03", 
+    "quantity": 1, 
+    "size": "small",
+    "topping": [], 
+    "note": "Ít đá thôi nhé!"
+}
+###
+POST http://localhost:8000/topping/add
+Content-Type: application/json
+
+{
+    "name": "Pudding trứng",
+    "price": 10000
+}
+
+###
+PUT http://localhost:8000/cart/update-increase
+Content-Type: application/json
+
+{
+    "userID": "68f79841532b8744f537b2e3",
+    "itemID": "692e8d55a4b7656c1e8defa1"
+}
+
+###
+POST http://localhost:8000/order/create
+Content-Type: application/json
+
+{
+    "userID": "68f79841532b8744f537b2e3"
+}
+###
+POST http://localhost:8000/momo/create
+Content-Type: application/json
+
+{
+    "orderID": "ORD-1764746095705"
+}
+
+###
+GET http://localhost:8000/order/view?orderID=ORD-1764746095705
+###
+DELETE http://localhost:8000/order/delete-interrupt-order
+Content-Type: application/json
+
+{
+    "userID": "68f79841532b8744f537b2e3"
+}
+
+###
+PUT http://localhost:8000/voucher/apply
+Content-Type: application/json
+
+{
+    "orderID": "ORD-1764663005685",
+    "voucherCode": "VAMY83O"
+}
+
+###
+POST http://localhost:8000/deliver/calculate-fee
+Content-Type: application/json
+
+{
+    "userID": "68f79841532b8744f537b2e3",
+    "orderID": "ORD-1764746095705",
+    "tipsforDriver": "5000",
+    "addressID": "ADDR-1764743164498"
+}
+###
+POST http://localhost:8000/address/add
+Content-Type: application/json
+
+{
+    "name": "Xuân Mai",
+    "userID": "68f79841532b8744f537b2e3",
+    "address": "39 Hoàng Bật Đạt, Phường 15, Tân Bình, Thành phố Hồ Chí Minh",
+    "phone": "0812930689",
+    "type": "work"
+}
+###
+GET http://localhost:8000/cart/view-and-caculate-total-money?userID=68f79841532b8744f537b2e3
+
+###
+PUT http://localhost:8000/order/change-order-status?orderID=ORD-1765864323453&status=confirm
+
+###
+GET http://localhost:8000/order/view?orderID=ORD-1764663005685

@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 const dotenv = require('dotenv')
 dotenv.config()
-const order = require('../models/order')
+const order = require('../../models/order')
 const { VNPay, ignoreLogger, VnpLocale, dateFormat, ProductCode } = require('vnpay')
 
 //------------------ API TẠO THANH TOÁN VNPay ------------------

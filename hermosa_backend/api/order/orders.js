@@ -2,72 +2,142 @@ const express = require('express')
 const router = express.Router()
 const dotenv = require('dotenv')
 const mongoose = require('mongoose')
-const cart = require('../models/cart')
-const menu = require('../models/menu')
-const order = require('../models/order')
-const user = require('../models/user')
+const cart = require('../../models/cart')
+const menu = require('../../models/menu')
+const order = require('../../models/order')
+const user = require('../../models/user')
+const voucher = require('../../models/voucher')
+const voucherUsage = require('../../models/voucherUsage')
+
 dotenv.config();
 
-async function SumOfProduct(UID) {
-  let total = 0
-  const detailedItems = []
-  const findUSer = await cart.findOne({userID: UID})
-  const ID = findUSer.items.map(item => item.productID)
-  const products = await menu.find({productID: {$in: ID}})
-  
-    for(const m of findUSer.items){
-      const product = products.find(p=> p.productID === m.productID)
-      if(product){
-        const subtotal = product.price *m.quantity
-        total += subtotal
-        detailedItems.push({
-          name: product.name,
-          productID: product.productID,
-          price: product.price,
-          quantity: m.quantity,
-          subtotal
-        })
-      }
-    }
-    findUSer.totalMoney = total
-    await findUSer.save()
-    return {total, detailedItems}
-}
 //---------------------------TAO DON HANG MOI------------------
-router.post('/create', async (req,res)=>{
-    try{
-    let {userID,paymentMethod, paymentStatus, deliver, deliverAddress, note, tipsforDriver} = req.body
-    const userCart = await cart.findOne({userID})
-    if(userCart.items.length === 0){
-        return res.json({status:"Failed", message:"Cart is empty"})
+//Tìm và tự động áp dụng voucher tốt nhất cho đơn hàng khi vừa được tạo ra
+async function autoApplyVoucher(fOrder) {
+  let findUserID = fOrder.userID
+  let fUser = await voucherUsage.findOne({ userID: findUserID })
+  if (!fUser) {
+    fUser = await voucherUsage.create({
+      userID: findUserID,
+      voucherUse: []
+    })
+  }
+  const now = new Date();
+
+  // Lấy voucher hợp lệ về thời gian và điều kiện đơn hàng
+  const available = await voucher.find({
+    validFrom: { $lte: now },
+    validTo: { $gte: now },
+    minPurchaseAmount: { $lte: fOrder.totalInvoice }
+  }).lean()
+  if (available.length === 0) {
+    return {
+      voucherCodeApply: null,
+      discountAmount: 0,
+      totalInvoiceAfterVoucher: fOrder.totalInvoice
     }
-    const {total,detailedItems}=await SumOfProduct(userID)
-    const newOrder = new order({
+  }
+
+  // Lọc voucher chưa hết lượt
+  const usableVoucher = []
+  for (let v of available) {
+    const usage = (fUser.voucherUse || []).find(
+      u => String(u.voucherCode).trim() === String(v.voucherCode).trim()
+    )
+    const usedCount = usage?.sumofUse ?? 0
+
+    if (usedCount < v.usageLimit) usableVoucher.push(v);
+  }
+
+  if (usableVoucher.length === 0) {
+    return {
+      voucherCodeApply: null,
+      discountAmount: 0,
+      totalInvoiceAfterVoucher: fOrder.totalInvoice
+    }
+  }
+
+  // Tìm voucher giảm nhiều nhất
+  let bestVoucher = null
+  let maxDiscount = 0
+
+  usableVoucher.forEach(v => {
+    let discount = 0
+    if (v.discountType === "percentage") {
+      discount = fOrder.totalInvoice * (v.discountValue / 100)
+    } else if (v.discountType === "fixed") {
+      discount = v.discountValue
+    }
+    if (discount > maxDiscount) {
+      maxDiscount = discount;
+      bestVoucher = v;
+    }
+  })
+  if (!bestVoucher) {
+    return {
+      voucherCodeApply: null,
+      discountAmount: 0,
+      totalInvoiceAfterVoucher: fOrder.totalInvoice
+    }
+  }
+
+  return {
+    voucherCodeApply: bestVoucher.voucherCode,
+    discountAmount: maxDiscount
+  }
+}
+router.post('/create', async (req,res)=>{
+  try{
+    let { userID } = req.body
+    const userCart = await cart.findOne({ userID })
+    const findOrder = await order.findOne({ userID })
+    if(findOrder){
+        return res.json({status: "Failed", message: "Đã có sẳn một order chưa được hoàn thành, hãy hoàn thành trước khi tạo thêm order khác"})
+    }
+    let newOrder = new order({
         orderID: `ORD-${Date.now()}`,
         status: "pending",
         userID,
-        totalInvoice: total,
-        totalInvoiceAfterVoucher,
-        totalInvoiceAfterShip,
-        products: detailedItems,
-        paymentMethod: paymentMethod,
-        paymentStatus: paymentStatus,
-        deliver: deliver,
-        deliverAddress: deliverAddress,
-        note: note,
-        tipsforDriver,
+        totalInvoice: userCart.totalMoney,
+        finalTotal: userCart.totalMoney,
+        products: userCart.items,
+        paymentStatus: "not_done",
         createAt: Date.now()
     })
     await newOrder.save()
-    await cart.updateOne({userID},{$set: {items:[]}})
-    res.json({
-        status: "Success", message: "Order created successfull", data: newOrder
-    })
+    
+    // Áp dụng voucher tốt nhất
+    const voucherResult = await autoApplyVoucher(newOrder)
+    newOrder = await order.findOneAndUpdate(
+      { orderID: newOrder.orderID },
+      { voucherCodeApply: voucherResult.voucherCodeApply,
+        discountAmount: voucherResult.discountAmount,
+      },
+      { new: true }
+    )
+    await newOrder.save()
+    newOrder.finalTotal = Number(newOrder.totalInvoice) - Number(newOrder.discountAmount) + Number(newOrder.deliveryFee) + Number(newOrder.tipsforDriver)
+    await newOrder.save()
+    res.json({ status: "Success", message: "Tạo đơn hàng thành công", data: newOrder})
+  }
+  catch (err){  
+    res.json({status: 'Failed', message: 'Tạo đơn hàng mới không thành công', detail: err.message})
+  }
+})
+
+
+//Xóa đơn hàng, khi người dùng interupt đơn hàng mà không nhấn place order chính thức (thoát giao diện or refresh trang đơn hàng
+router.delete('/delete-interrupt-order', async (req,res)=>{
+    try{
+        let {userID} = req.body
+        await order.findOneAndDelete({userID})
+        res.json({status: "Success", message: "Xóa đơn hàng gián đoạn thành công"})
     }
-    catch (err){  
-        res.json({status: 'Failed', message: 'Internal server error', detail: err.message,})
+    catch(err){
+        res.json({status: 'Failed', message: 'Không thể xóa đơn hàng thành công', detail: err.message})
     }
 })
+
 //-----------------------THAY DOI TRANG THAI DON HANG-----------
 router.put('/change-order-status', async (req,res)=>{
     try{
@@ -79,7 +149,7 @@ router.put('/change-order-status', async (req,res)=>{
         res.json({status:"Success", message:"Change order status successful", data: updated})
     }
     catch(err){
-        res.json({status: 'Failed', message: 'Internal server error', detail: err.message,})
+        res.json({status: 'Failed', message: 'Internal server error', detail: err.message})
     }
 })
 //-----------------------HUY DON HANG-----------------------

@@ -23,37 +23,37 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-const userRoute = require('./api/users')
+const userRoute = require('./api/1.users')
 app.use('/user', userRoute); 
 
-const menuRoute = require('./api/menu')
+const menuRoute = require('./api/2.menu')
 app.use('/menu',menuRoute)
 
-const cartRoute = require('./api/carts')
+const cartRoute = require('./api/3.carts')
 app.use('/cart',cartRoute)
 
-const orderRoute = require('./api/orders')
+const orderRoute = require('./api/order/orders')
 app.use('/order',orderRoute)
 
-const paymentRoute = require('./api/momo')
-app.use('/payment-momo', paymentRoute)
+const paymentRoute = require('./api/payment/momo')
+app.use('/momo', paymentRoute)
 
-const payment2Route = require('./api/vnpay')
-app.use('/payment-vnpay', payment2Route)
+const payment2Route = require('./api/payment/vnpay')
+app.use('/vnpay', payment2Route)
 
-const toppingRoute = require('./api/toppings')
+const toppingRoute = require('./api/4.toppings')
 app.use('/topping', toppingRoute)
 
-const voucherRoute = require('./api/vouchers')
+const voucherRoute = require('./api/order/vouchers')
 app.use('/voucher', voucherRoute)
 
-const notificationRoute = require('./api/notifications')
+const notificationRoute = require('./api/5.notifications')
 app.use('/notification', notificationRoute)
 
-const deliverAddressRoute = require('./api/addresses')
+const deliverAddressRoute = require('./api/deliver/addresses')
 app.use('/address', deliverAddressRoute)
 
-const deliverRoute = require('./api/deliver')
+const deliverRoute = require('./api/deliver/deliver')
 app.use('/deliver', deliverRoute)
 
 app.listen(port, () => console.log("Server running on port 8000"));
