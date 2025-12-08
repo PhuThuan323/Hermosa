@@ -1,4 +1,3 @@
-// src/pages/OrderManagement.jsx
 import React, { useState, useEffect } from "react";
 import { Calendar as CalendarIcon, Search, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
@@ -207,7 +206,7 @@ export default function OrderManagement() {
 
       if (res.data.status === "Success") {
         toast.success("Đã đánh dấu thanh toán thành công!");
-        fetchOrders(); // reload để thấy Paid thật từ server
+        fetchOrders(); 
       }
     } catch (err) {
       console.error(err);

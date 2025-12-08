@@ -1,4 +1,3 @@
-// src/pages/Products.jsx
 import React, { useState, useEffect } from "react";
 import { Search, Plus, Edit, Trash2, Loader2 } from "lucide-react";
 import ProductModal from "../components/ProductModal.jsx";
@@ -135,7 +134,7 @@ export default function Products() {
     }
   };
 
-  // SỬA SẢN PHẨM – Gửi thêm backgroundHexacode & category (sau khi sửa backend thì sẽ update đúng)
+  // SỬA SẢN PHẨM – Gửi thêm backgroundHexacode & category 
   const handleEditProduct = async (formData) => {
     try {
       // 1. Cập nhật ảnh nếu có đổi (riêng biệt)
@@ -153,7 +152,7 @@ export default function Products() {
         price: formData.price,
         description: formData.description || "",
         backgroundHexacode: formData.backgroundHexacode,
-        category: formData.category, // Thêm để update nếu user đổi category trong modal
+        category: formData.category, 
       });
 
       toast.success("Cập nhật thành công! Màu mới xinh lung linh luôn bé ơi~");

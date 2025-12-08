@@ -1,4 +1,3 @@
-// src/pages/CustomerManagement.jsx
 import React, { useState, useEffect } from "react";
 import { Search, Loader2, UserPlus, Edit, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -194,7 +193,7 @@ export default function CustomerManagement() {
               </table>
             </div>
 
-            {/* PHÂN TRANG ĐẸP NHƯ ORDERS */}
+            {/* PHÂN TRANG */}
             <div className="mt-8 flex flex-col items-center gap-6">
               <div className="flex items-center gap-3">
                 <button

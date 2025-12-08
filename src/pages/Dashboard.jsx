@@ -1,4 +1,3 @@
-// src/pages/Dashboard.jsx
 import React, { useState, useEffect } from "react";
 import { Users, Package, ShoppingCart, TrendingUp, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import {
@@ -28,7 +27,6 @@ export default function Dashboard() {
   const [revenueData, setRevenueData] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // THÊM STATE ĐỂ CHỌN THÁNG/NĂM
   const [selectedDate, setSelectedDate] = useState(new Date());
 
   useEffect(() => {
@@ -36,7 +34,6 @@ export default function Dashboard() {
       try {
         setLoading(true);
 
-        // Lấy dữ liệu sản phẩm để map ảnh + giá
         const menuRes = await axios.get(`${MENU_API}/all-product`);
         const menuItems = menuRes.data.status === "Success" ? menuRes.data.data : [];
         const menuMap = {};
@@ -99,7 +96,7 @@ export default function Dashboard() {
           return {
             name: format(day, "dd"),
             sales: Math.round(revenue / 1000),
-            profit: Math.round(revenue * 0.4 / 1000), // ước tính lợi nhuận
+            profit: Math.round(revenue * 0.4 / 1000), 
           };
         });
 
@@ -123,7 +120,7 @@ export default function Dashboard() {
     };
 
     fetchDashboardData();
-  }, [selectedDate]); // ← Quan trọng: mỗi khi đổi tháng thì load lại
+  }, [selectedDate]); 
 
   return (
     <div className="bg-surface min-h-screen px-8 py-6">

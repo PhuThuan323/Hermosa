@@ -1,18 +1,14 @@
-// src/components/Topbar.jsx
 import React, { useState, useEffect } from "react";
 import { Search, Bell, ChevronDown } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import adminAvatar from "../assets/logo.png";
 
-// DỄ THAY AVATAR: CHỈ CẦN ĐỔI 1 DÒNG NÀY THÔI BÉ ƠI!!!
-const ADMIN_AVATAR = adminAvatar; // THAY ẢNH CỦA BÉ VÀO ĐÂY NÈ!!!
-// Hoặc ảnh local: "/assets/avatar-hermosa.jpg"
+const ADMIN_AVATAR = adminAvatar; 
 
 export default function Topbar() {
   const [searchQuery, setSearchQuery] = useState("");
   const location = useLocation();
 
-  // Gửi sự kiện tìm kiếm toàn cục khi bé gõ
   useEffect(() => {
     const trimmed = searchQuery.trim();
     window.dispatchEvent(new CustomEvent("globalSearch", { detail: trimmed }));
@@ -31,7 +27,7 @@ export default function Topbar() {
   return (
     <header className="h-[70px] bg-white border-b border-gray-200 flex items-center justify-between px-8 shadow-sm sticky top-0 z-50">
       <div className="flex items-center gap-6">
-        {/* THANH SEARCH SIÊU MƯỢT - HOẠT ĐỘNG THẬT 100% */}
+        {/* THANH SEARCH */}
         <div className="relative w-96">
           <Search className="absolute left-4 top-3.5 text-gray-400 w-5 h-5" />
           <input

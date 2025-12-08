@@ -1,4 +1,3 @@
-// src/components/SelectOrderStatusModal.jsx
 import React, { useState } from "react";
 
 export default function SelectOrderStatusModal({ open, onClose, onApply }) {

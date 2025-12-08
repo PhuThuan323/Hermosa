@@ -2,7 +2,6 @@ import React from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import Sidebar from './components/Sidebar'
 import Topbar from './components/Topbar'
-import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Orders from './pages/Orders'
 import Customers from './pages/Customers'
@@ -15,7 +14,6 @@ export default function App() {
   return (
     <div className="min-h-screen">
       <Routes>
-        <Route path="/login" element={<Login />} />
         <Route
           path="/*"
           element={

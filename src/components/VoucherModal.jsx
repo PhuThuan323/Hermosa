@@ -1,4 +1,3 @@
-// src/components/VoucherModal.jsx
 import React, { useState, useEffect } from "react";
 import { X, Percent, DollarSign } from "lucide-react";
 import { format } from "date-fns";
@@ -53,14 +52,12 @@ export default function VoucherModal({ isOpen, onClose, onSubmit, initialData, i
 
     try {
       if (isEdit) {
-        // GỌI ĐÚNG API UPDATE (có voucherCode trong body)
         await axios.put(`${API_BASE}/update`, {
           voucherCode: initialData.voucherCode,
           ...formData,
         });
         toast.success("Cập nhật voucher thành công!");
       } else {
-        // GỌI ĐÚNG API CREATE
         await axios.post(`${API_BASE}/create`, formData);
         toast.success("Tạo voucher thành công!");
       }

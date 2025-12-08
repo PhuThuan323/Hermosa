@@ -1,4 +1,3 @@
-// src/components/ProductModal.jsx
 import React, { useState, useEffect } from "react";
 import { X, ImageIcon, Palette } from "lucide-react";
 import { toast } from "react-hot-toast";
@@ -6,7 +5,7 @@ import { toast } from "react-hot-toast";
 const CATEGORY_MAP = {
   Cakes: "cake",
   Drinks: "drink",
-  Foods: "launch", // Bé vẫn thấy "Foods" ngon lành!
+  Foods: "launch", 
 };
 
 const PRESET_COLORS = [

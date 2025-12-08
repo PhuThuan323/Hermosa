@@ -1,4 +1,3 @@
-// src/pages/VoucherManagement.jsx
 import React, { useState, useEffect } from "react";
 import {
   Plus,
@@ -37,7 +36,6 @@ export default function VoucherManagement() {
     try {
       setLoading(true);
 
-      // GỌI ĐÚNG 2 API CÓ THẬT TRONG BACKEND
       const [availableRes, expiredRes] = await Promise.all([
         axios.get(`${API_BASE}/available-admin`),
         axios.get(`${API_BASE}/expired`),

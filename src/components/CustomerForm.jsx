@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 
 export default function CustomerForm({ isEdit = false, existingCustomer, onSave }) {
   const navigate = useNavigate();
-  const { id } = useParams(); // optional if editing via route like /customers/edit/:id
+  const { id } = useParams(); 
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -15,7 +15,6 @@ export default function CustomerForm({ isEdit = false, existingCustomer, onSave 
     notes: "",
   });
 
-  // Prefill when editing
   useEffect(() => {
     if (isEdit && existingCustomer) {
       setFormData(existingCustomer);
@@ -28,8 +27,8 @@ export default function CustomerForm({ isEdit = false, existingCustomer, onSave 
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave?.(formData); // optional handler from parent
-    navigate("/customers"); // back to list after save
+    onSave?.(formData); 
+    navigate("/customers"); 
   };
 
   return (
