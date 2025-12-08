@@ -8,11 +8,9 @@ const axios = require('axios')
 dotenv.config()
 
 //----------------------------TẠO YÊU CẦU THANH TOÁN VỚI MOMO--------------------
-let orderIDGOC = 0
 router.post('/create', async (req, res) => {
     try {
         const { orderID } = req.body
-        let total = 0
         const findOrder = await order.findOne({ orderID })
         if (!findOrder) {
             console.log("[CREATE PAYMENT] Order not found:", orderID);
@@ -25,12 +23,12 @@ router.post('/create', async (req, res) => {
         var requestId = partnerCode + new Date().getTime();
         var orderId = requestId;
         var orderInfo = "Paying your order: " + orderID + " by Momo";
-        var redirectUrl = process.env.MOMO_REDIRECT_URL;
-        var ipnUrl = "https://bfd1855319b3.ngrok-free.app/momo/momo-notify"
+        var redirectUrl = `${process.env.MOMO_REDIRECT_URL}?orderID=${orderID}`
+        var ipnUrl = process.env.MOMO_IPN_URL
         var amount = findOrder.finalTotal.toString()
         var requestType = "captureWallet"
-        var extraData = "";
-        orderIDGOC = orderID
+        var extraData = Buffer.from(JSON.stringify({ orderID })).toString("base64");
+
         var rawSignature =
             "accessKey=" + accessKey +
             "&amount=" + amount +
@@ -78,7 +76,15 @@ router.post('/create', async (req, res) => {
         })
 
     } catch (error) {
-        return res.status(500).json({ message: "Server error", detail: error.message });
+        console.error("[MOMO ERROR] Response data:", error.response?.data);
+        console.error("[MOMO ERROR] Status:", error.response?.status);
+        console.error("[MOMO ERROR] Headers:", error.response?.headers);
+
+        return res.status(500).json({
+            message: "Server error",
+            momoError: error.response?.data || null
+        });
+
     }
 });
 
@@ -88,30 +94,52 @@ router.post('/create', async (req, res) => {
 
 router.post('/momo-notify', async (req, res) => {
   try {
+    console.log("📥 MoMo Callback:", req.body);
+
     const {
-      partnerCode, orderId, requestId, amount, orderInfo,
-      orderType, transId, resultCode, message, payType,
-      responseTime, extraData = "", signature
+      orderId,  // từ MoMo
+      resultCode,
+      message,
+      extraData
     } = req.body;
 
-    if (resultCode === 0) {
-      const orderIDGOC = (orderInfo && (orderInfo.match(/(ORD-[0-9]+)/) || [])[1]) || null;
-      if (!orderIDGOC) {
-        return res.status(400).json({ message: "Invalid orderInfo format" })
-      }
-      const foundOrder = await order.findOne({ orderID: orderIDGOC })
-      if (!foundOrder) return res.status(404).json({ message: "Order not found" })
-
-      foundOrder.paymentStatus = "done"
-      foundOrder.payingIn = Date.now()
-      await foundOrder.save()
-      return res.status(200).json({ message: "Payment confirmed", data: foundOrder })
+    // 📌 Decode extraData lấy orderID gốc
+    let orderOrigin = null;
+    if (extraData) {
+        const decoded = JSON.parse(Buffer.from(extraData, "base64").toString("utf8"));
+        orderOrigin = decoded.orderID;
     }
 
-    return res.status(200).json({ message: "Payment not successful", detail: message })
+    console.log("🔎 orderID gốc:", orderOrigin);
+
+    if (!orderOrigin) {
+        return res.status(400).json({ message: "Missing orderID origin in extraData" });
+    }
+
+    // 🔍 Tìm đơn hàng trong DB bằng orderID gốc
+    const foundOrder = await order.findOne({ orderID: orderOrigin });
+    console.log("🗃 foundOrder:", foundOrder);
+
+    if (!foundOrder) {
+        return res.status(404).json({ message: "Order not found in DB" });
+    }
+
+    if (resultCode === 0) {
+        foundOrder.paymentStatus = "done";
+        foundOrder.payingIn = Date.now();
+        await foundOrder.save();
+
+        return res.status(200).json({
+            message: "Payment confirmed",
+            data: foundOrder
+        });
+    }
+
+    return res.status(200).json({ message: "Payment failed", detail: message });
 
   } catch (err) {
-    return res.status(500).json({ message: "Server error", error: err.message })
+    console.log("❌ Callback error:", err);
+    return res.status(500).json({ message: "Server error", error: err.message });
   }
 });
 
@@ -126,7 +154,7 @@ router.get('/confirm', async (req, res) => {
         if(findOrder.paymentStatus === "done"){
             return res.status(200).json({ message: "Đơn hàng đã được thanh toán thành công", data: findOrder})
         }
-        else if (findOrder.paymentMethod === "not_done"){
+        else {
             return res.status(200).json({ message: "Đơn hàng chưa được thanh toán thành công", data: findOrder})
         }
     } catch (error) {

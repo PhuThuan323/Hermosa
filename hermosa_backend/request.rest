@@ -1,491 +1,9 @@
-GET http://localhost:8000/users
-###
-POST http://localhost:3000/users
-Content-Type: application/json
-
-{
-    "name": "PhuThuan",
-    "password": "password"
-}
-
-###
-POST http://localhost:8000/user/signup
-Content-Type: application/json
-
-{
-    "email": "phuthuan.trannguyen@aiesec.net"
-}
-
-###
-POST http://localhost:8000/user/verify-otp
-Content-Type: application/json
-
-{
-    "email": "phuthuan.trannguyen@aiesec.net",
-    "otp": "457849"
-}
-###
-PUT http://localhost:8000/user/set-password-username
-Content-Type: application/json
-
-{
-    "email": "phuthuan.trannguyen@aiesec.net",
-    "password": "123456789",
-    "username": "PhuthuanDzai"
-}
-###
-POST http://localhost:8000/user/login
-Content-Type: application/json
-
-{
-    "email": "phuthuan.trannguyen@aiesec.net",
-    "password": "PhuThuan"
-}
-
-###
-PUT http://localhost:8000/user/change-password
-Content-Type: application/json
-
-{
-    "userID": "68f79841532b8744f537b2e3",
-    "password": "Ot&fRf7n",
-    "newPassword": "PhuThuan"
-}
-###
-POST http://localhost:8000/user/google/login
-Content-Type: application/json
-
-{
-    "email": "23521554@gm.uit.edu.vn",
-    "password": "1596453758"
-}
-###
-POST http://localhost:8000/user/forgot-password
-Content-Type: application/json
-
-{
-    "email": "phuthuan.trannguyen@aiesec.net"
-}
-###
-GET http://localhost:8000/user/google/login
-
-###
-DELETE http://localhost:80000/user/delete
-Content-Type: application/json
-
-{
-    "userID": "68f33de9a2780fa673ba35cd",
-    "password": "123456789",
-}
-//--------------------------PRODUCT--------------------
-###
-POST http://localhost:8000/menu/add
-Content-Type: application/json
-
-{
-    "name": "Strawberries Cheese",
-    "productID": "C04", 
-    "price": "100000", 
-    "category": "cake",
-    "picture": "https://res.cloudinary.com/dmjq5dtyz/image/upload/cld-sample",
-    "description": "This dessert features a buttery biscuit base topped with a silky smooth cream cheese layer. Fresh strawberry sauce adds a fruity sweetness, creating a perfect balance of tangy and creamy in every bite."
-}
-###
-DELETE  http://localhost:8000/menu/delete
-Content-Type: application/json
-
-{
-    "productID": "A01"
-}
-
-###
-GET http://localhost:8000/menu/all-product
-
-###
-GET http://localhost:8000/menu/product?productID=E01
-
-###
-GET http://localhost:8000/menu/filter?category=cake
-
-###
-DELETE http://localhost:8000/menu/favorite-delete?userID=68f34f6e3861439314517ab2&productID=B01
-
-### 
-GET http://localhost:8000/menu/favorite-list?userID=68f34f6e3861439314517ab2
-
-###
-POST http://localhost:8000/menu/favorite-add?userID=68f34f6e3861439314517ab2&productID=B01 
-
-###
-POST http://localhost:8000/cart/add
-Content-Type: application/json
-
-{
-    "userID": "68f34f6e3861439314517ab2",
-    "productID": "A02"
-}
-
-###
-PUT http://localhost:8000/cart/update-decrease?userID=68f34f6e3861439314517ab2&productID=A03
-
-###
-DELETE http://localhost:8000/cart/delete-all?userID=68f34f6e3861439314517ab2
-
-###
-GET http://localhost:8000/cart/view-and-caculate-total-money?userID=68f34f6e3861439314517ab2
-
-###
-POST http://localhost:8000/order/create
-Content-Type: application/json
-
-{
-    "userID": "68f79841532b8744f537b2e3",
-    "paymentMethod": "momo",
-    "paymentStatus": "not_done",
-    "deliver": "false",
-    "deliverAddress": "123 Nguyễn Văn Cừ, Q5",
-    "note": "Giao trong giờ hành chính"
-}
-###
-PUT http://localhost:8000/order/change-order-status?orderID=ORD-1760863513250&status=done
-###
-GET http://localhost:8000/order/view-all
-
-###
-GET http://localhost:8000/order/list?startDate=2025-10-19&endDate=2025-10-19
-
-###
-GET http://localhost:8000/payment/confirm?orderID=ORD-1761275648168
-###
-POST http://localhost:8000/order/review-order-and-products?orderID=ORD-1760863513250
-Content-Type: application/json
-
-{
-  "orderReview": "Đơn hàng giao nhanh, nhân viên thân thiện.",
-  "productsReview": [
-    { "productID": "A03", "rating": 5, "comment": "Rất ngon!" },
-    { "productID": "B01", "rating": 4, "comment": "Ổn, giá hợp lý" },
-    { "productID": "A02", "rating": 5, "comment": "Ổn, giá hợp lý" }
-  ]
-}
-
-###
-PUT http://localhost:8000/order/change-order-review?orderID=ORD-1760863513250
-{
-  "orderReview": "Siêu nhân hồng",
-  "productsReview": [
-    { "productID": "A03", "rating": 5, "comment": "Rất ngon!" },
-    { "productID": "B01", "rating": 4, "comment": "Ngon nhưng mà giá chát quá nha" },
-  ]
-}
-###
-POST http://localhost:8000/payment-momo/create-payment-momo
-Content-Type: application/json
-
-{
-    "orderID": "ORD-1761275648168",
-    "userID": "68f79841532b8744f537b2e3"
-}
-###
-GET http://localhost:8000/payment-momo/confirm?orderID=ORD-1762821679885
-###
-POST http://13.250.179.85/payment-momo/create-payment-momo
-Content-Type: application/json
-
-{
-    "orderID": "ORD-1762739684875"
-}
-###
-POST http://localhost:8000/payment-momo/create-payment-momo
-Content-Type: application/json
-
-{
-    "orderID": "ORD-1761275648168"
-}
-###
-POST http://13.250.179.85/payment-momo/momo-notify
-Content-Type: application/json
-
-{
-  "partnerCode": "MOMO",
-  "orderId": "MOMO1763889387140",
-  "requestId": "MOMO1763889387140",
-  "amount": "100000",
-  "orderInfo": "Paying your order: ORD-1762739684875 by Momo",
-  "orderType": "momo_wallet",
-  "transId": "1763889387291",
-  "resultCode": 0,
-  "message": "Successful.",
-  "payType": "qr",
-  "responseTime": 1700000001000,
-  "extraData": "",
-  "signature": "58a2895816ffacd47bec003abbc0cd0616a409732fbe084a9c9aa7389442ec38"
-}
-
-
-###
-POST http://localhost:8000/topping/add 
-Content-Type: application/json
-
-{
-    "name": "Trân châu đen",
-    "toppingID": "T01",
-    "price": 10000,
-    "out_of_service": false
-}
-
-
-###
-POST http://localhost:8000/cart/add
-Content-Type: application/json
-
-{
-    "userID": "68f79841532b8744f537b2e3", 
-    "productID": "C04", 
-    "quantity": 2, 
-    "size": "large",
-    "topping": ["Trân châu trắng"], 
-    "note": "Nhớ làm nóng cho tôi nhé!"
-}
-###
-PUT http://localhost:8000/cart/update-decrease 
-Content-Type: application/json
-
-{
-    "userID": "68f79841532b8744f537b2e3",
-    "itemID": "68f89201a88caad868584a06"
-}
-
-###
-DELETE http://localhost:8000/cart/delete  
-Content-Type: application/json
-
-{
-    "userID": "68f79841532b8744f537b2e3",
-    "itemID": "68f8904a799430e170879fb2"
-}
-### 
-GET http://localhost:8000/cart/view-and-caculate-total-money?userID=68f79841532b8744f537b2e3
-
-### 
-POST http://13.250.179.85/voucher/create
-Content-Type: application/json
-
-{
-    "description": "Tôi hận đời",
-    "discountType": "percentage",
-    "discountValue": "5",
-    "minPurchaseAmount": "1000000",  
-    "validFrom": "2025-01-01T00:00:00.000Z",
-    "validTo": "2025-12-31T23:59:59.000Z",
-    "usageLimit": "2",
-    "applicableProducts": null
-}
-
-###
-DELETE http://localhost:8000/voucher/delete
-Content-Type: application/json
-
-{
-    "voucherCode": "V16VPTB"
-}
-###
-GET http://localhost:8000/voucher/total-of-usage
-###
-POST http://localhost:8000/voucher/suggestion 
-Content-Type: application/json
-
-{
-    "cartTotal": "465000",
-    "userID": "690d58c681db5d6a42009e06"
-}
-###
-GET http://localhost:8000/voucher/detail?voucherCode=VVQ9R93
-###
-GET http://localhost:8000/address/suggestion?input=Khu phố 34, Phường Linh Xuân, Thành phố Thủ Đức, Thành phố Hồ Chí Minh
-
-###
-POST http://localhost:8000/address/add
-Content-Type: application/json
-
-{
-    "name": "Nguyen Van A",
-    "userID": "68f79841532b8744f537b2e3",
-    "addressDetail": {
-        "street": "Hàn Thuyên",
-        "ward": "Phường Linh Xuân",
-        "district": "Quận Thủ Đức",
-        "province": "Hồ Chí Minh",
-        "country": "Viet Nam"
-    },
-    "phone": "0987654321",
-    "type": "home"
-}
-###
-GET http://localhost:8000/address/show?userID=68f79841532b8744f537b2e3&type=home
-###
-DELETE http://localhost:8000/address/delete
-Content-Type: application/json
-
-{
-    "userID": "68f79841532b8744f537b2e3",
-    "addressID": "ADDR-1764440407727"
-}
-###
-PUT http://13.250.179.85/address/update
-Content-Type: application/json
-
-{
-    "name": "Duong Thi My Nhuy",
-    "userID": "68f79841532b8744f537b2e3",
-    "addressID": "ADDR-1764440407727",  
-    "addressDetail": {
-        "street": "789 Tran Hung Dao",
-        "ward": "Ward 1",
-        "district": "District 5",
-        "city": "Ho Chi Minh City",
-        "country": "Viet Nam"
-    },
-    "phone": "0123456789",
-    "type": "work"
-}
-###
-PUT http://localhost:8000/voucher/apply
-Content-Type: application/json
-
-{
-    "voucherCode": "VVQ9R93",
-    "orderID": "ORD-1762734186601"
-}
-
-###
-PUT http://localhost:8000/voucher/confirm-use
-Content-Type: application/json
-
-{
-    "voucherCode": "VVQ9R93",
-    "orderID": "ORD-1762734186601"
-}
-
-###
-PUT http://localhost:8000/voucher/update
-Content-Type: application/json
-
-{
-    "voucherCode": "VQIUTX1",
-    "description": "Giảm giá cố định 20k cho đơn từ 150k",
-    "discountType": "fixed",
-    "discountValue": "20000",
-    "minPurchaseAmount": "0",
-    "validFrom": "2025-02-01T00:00:00.000Z",
-    "validTo": "2025-11-30T23:59:59.000Z",
-    "usageLimit": "5"
-}
-
-###
-PUT http://localhost:8000/voucher/auto-apply
-Content-Type: application/json
-
-{
-    "orderID": "ORD-1762734186601"
-}
-###
-GET http://localhost:8000/voucher/available-admin
-
-###
-PUT http://localhost:8000/voucher/re-active
-Content-Type: application/json
-
-{
-    "voucherCode": "VQIUTX1",
-    "newValidFrom": "2025-12-01T00:00:00.000Z",
-    "newValidTo": "2025-12-31T23:59:59.000Z"
-}
-###
-POST http://localhost:8000/notification/save-fcm-token
-Content-Type: application/json
-
-{
-    "userID": "68f7a3d843cf46022bfc9fa0",
-    "fcmToken": "fcm_token_example_123456"
-}
-###
-
-###
-POST http://localhost:8000/notification/create
-Content-Type: application/json
-
-{
-    "title": "Trà sữa + bánh ngọt: cuối tuần ấm áp bên người thương",
-    "message": "Mua trà sữa để nhận ngay bánh ngọt thơm ngon, ưu đãi hấp dẫn chỉ có trong tuần này!"
-}
-###
-GET http://localhost:8000/notification/list-all
-
-###
-GET http://localhost:8000/address/show
-
-
-###
-GET https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/province
-Token: a7f26326-ce64-11f0-9ca3-9e851f00bd99
-Content-Type: application/json
-
-###
-POST http://localhost:8000/deliver/calculate-fee
-Content-Type: application/json
-
-{
-    "orderID": "ORD-1761275648168",
-    "addressID": "ADDR-1764562812720"
-}
-###
-POST http://localhost:8000/cart/add
-Content-Type: application/json
-
-{
-    "userID": "68f79841532b8744f537b2e3", 
-    "productID": "C03", 
-    "quantity": 1, 
-    "size": "small",
-    "topping": [], 
-    "note": "Ít đá thôi nhé!"
-}
-###
-POST http://localhost:8000/topping/add
-Content-Type: application/json
-
-{
-    "name": "Pudding trứng",
-    "price": 10000
-}
-
-###
-PUT http://localhost:8000/cart/update-increase
-Content-Type: application/json
-
-{
-    "userID": "68f79841532b8744f537b2e3",
-    "itemID": "692e8d55a4b7656c1e8defa1"
-}
-
-###
 POST http://localhost:8000/order/create
 Content-Type: application/json
 
 {
     "userID": "68f79841532b8744f537b2e3"
 }
-###
-POST http://localhost:8000/momo/create
-Content-Type: application/json
-
-{
-    "orderID": "ORD-1764746095705"
-}
-
-###
-GET http://localhost:8000/order/view?orderID=ORD-1764746095705
 ###
 DELETE http://localhost:8000/order/delete-interrupt-order
 Content-Type: application/json
@@ -493,14 +11,19 @@ Content-Type: application/json
 {
     "userID": "68f79841532b8744f537b2e3"
 }
+###
+GET http://localhost:8000/address/suggestion?input=39/37 Hoàng Bật Đạt, Tân Bình 
 
 ###
-PUT http://localhost:8000/voucher/apply
+POST http://localhost:8000/address/add 
 Content-Type: application/json
 
 {
-    "orderID": "ORD-1764663005685",
-    "voucherCode": "VAMY83O"
+    "name": "Phu Thuan", 
+    "userID": "68f79841532b8744f537b2e3", 
+    "address": "Hoàng Bật Đạt, Phường 15, 72100, Tân Bình, Thành phố Hồ Chí Minh, Việt Nam", 
+    "phone": "0812930689", 
+    "type": "home"
 }
 
 ###
@@ -508,27 +31,50 @@ POST http://localhost:8000/deliver/calculate-fee
 Content-Type: application/json
 
 {
-    "userID": "68f79841532b8744f537b2e3",
-    "orderID": "ORD-1764746095705",
-    "tipsforDriver": "5000",
-    "addressID": "ADDR-1764743164498"
+    "orderID": "ORD-1765021368328", 
+    "userID": "68f79841532b8744f537b2e3", 
+    "tipsforDriver": 5000, 
+    "addressID": "ADDR-1765022289961"
 }
 ###
-POST http://localhost:8000/address/add
+POST https://76187f00e220.ngrok-free.app/momo/create
 Content-Type: application/json
 
 {
-    "name": "Xuân Mai",
-    "userID": "68f79841532b8744f537b2e3",
-    "address": "39 Hoàng Bật Đạt, Phường 15, Tân Bình, Thành phố Hồ Chí Minh",
-    "phone": "0812930689",
-    "type": "work"
+    "orderID": "ORD-1765021368328"
 }
-###
-GET http://localhost:8000/cart/view-and-caculate-total-money?userID=68f79841532b8744f537b2e3
 
 ###
-PUT http://localhost:8000/order/change-order-status?orderID=ORD-1765864323453&status=confirm
+POST https://76187f00e220.ngrok-free.app/notification/send-all
+Content-Type: application/json
+
+{
+    "notificationID": "NOTI-1765024594116", 
+    "scheduleAt": null
+}
 
 ###
-GET http://localhost:8000/order/view?orderID=ORD-1764663005685
+POST http://localhost:8000/notification/create 
+Content-Type: application/json
+
+{
+    "title": "Test nha mom", 
+    "message": "Gobi không im lặng là cook liền", 
+    "scheduleAt": null
+}
+
+###
+GET http://localhost:8001/api/v1/recommend/44905
+###
+GET http://localhost:8001/api/v1/recommend/also_viewed/75762?exclude_items=D6
+
+###
+GET http://localhost:8000/recommend/all-user
+
+###
+POST https://38d670f12a80.ngrok-free.app/momo/create
+Content-Type: application/json
+
+{
+    "orderID": "ORD-1765118833369-820"
+}

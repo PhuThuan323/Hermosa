@@ -81,9 +81,9 @@ async function calculateShippingFee({ addressID }) {
 
 router.post("/calculate-fee", async (req, res) => {
     try {
-        const { orderID, userID, tipsforDriver, addressID } = req.body
+        const { userID, tipsforDriver, addressID } = req.body
         const shippingFee = await calculateShippingFee({ addressID })
-        let fOrder = await order.findOne({ orderID })
+        let fOrder = await order.findOne({ userID })
         let fAdd = await add.findOne({userID})
         fOrder.deliveryFee = shippingFee.total
         fOrder.tipsforDriver = tipsforDriver

@@ -47,7 +47,7 @@ app.use('/topping', toppingRoute)
 const voucherRoute = require('./api/order/vouchers')
 app.use('/voucher', voucherRoute)
 
-const notificationRoute = require('./api/5.notifications')
+const notificationRoute = require('./api/noti/notifications')
 app.use('/notification', notificationRoute)
 
 const deliverAddressRoute = require('./api/deliver/addresses')
@@ -55,5 +55,8 @@ app.use('/address', deliverAddressRoute)
 
 const deliverRoute = require('./api/deliver/deliver')
 app.use('/deliver', deliverRoute)
+
+const recommendRoute = require('./api/recommend/recommend')
+app.use('/recommend', recommendRoute)
 
 app.listen(port, () => console.log("Server running on port 8000"));

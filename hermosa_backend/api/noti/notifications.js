@@ -2,10 +2,11 @@ const express = require('express')
 const router = express.Router()
 const mongoose = require('mongoose')
 const dotenv = require('dotenv')
-const noti = require('../models/notification')
-const admin = require('../config/firebase')
-const user = require('../models/user')
-const cron = require('node-cron');
+const noti = require('../../models/notification')
+const admin = require('../../config/firebase')
+const user = require('../../models/user')
+const cron = require('node-cron')
+
 dotenv.config();
 
 //Lưu lại FCM Token với riêng từng user, từng app 
@@ -13,16 +14,18 @@ dotenv.config();
 router.post('/save-fcm-token', async (req,res)=>{
     try{
         const { userID, fcmToken } = req.body
-        const fUser = await user.findById(userID)
-        if (!fUser.fcmToken) {
-            fUser.fcmToken = fcmToken;
-            await fUser.save();
-            return res.status(200).json({message: "Đã lưu lại token của người dùng", data: fUser});
-        }
-        else{
-            return res.status(200).json({message: "Token của người dùng đã tồn tại", data: fUser})
-        }
-        
+        const fUser = await user.findOne({userID})
+        // if (!fUser.fcmToken) {
+        //     fUser.fcmToken = fcmToken;
+        //     await fUser.save();
+        //     return res.status(200).json({message: "Đã lưu lại token của người dùng", data: fUser});
+        // }
+        // else{
+        //     return res.status(200).json({message: "Token của người dùng đã tồn tại", data: fUser})
+        // }
+        fUser.fcmToken = fcmToken;
+        await fUser.save();
+        return res.status(200).json({message: "Đã lưu lại token của người dùng", data: fUser});
     }
     catch(err){
         res.status(500).json({message: "Không thể lưu lại token của người dùng", details: err.message})
@@ -51,13 +54,20 @@ router.post('/create', async (req,res)=>{
 })
 
 //Gửi thông báo cho tất cả user ngay lập tức
-router.post('/send-all', async (req,res)=>{
-    try{
+router.post('/send-all', async (req, res) => {
+    try {
         const { notificationID, scheduleAt } = req.body
-        const fNoti = await noti.findOne({ notiID: notificationID });
+        const fNoti = await noti.findOne({ notiID: notificationID })
         const fUser = await user.find().lean()
-        if(scheduleAt === null){
-            const fcm_tokens_list = fUser.map(u => u.fcmToken).filter(token => token); 
+        if (scheduleAt === null) {
+            const fcm_tokens_list = fUser.map(u => u.fcmToken).filter(token => token);
+            if (fcm_tokens_list.length === 0) {
+                console.log("Không có FCM token hợp lệ!");
+                return res.status(400).json({
+                    message: "Không có FCM token hợp lệ để gửi thông báo"
+                });
+            }
+
             const payload = {
                 notification: {
                     title: fNoti.title,
@@ -67,32 +77,47 @@ router.post('/send-all', async (req,res)=>{
                     notificationID: notificationID,
                 }
             }
-            fNoti.sent = true
+
+            // Cập nhật trạng thái thông báo
+            fNoti.sent = true;
             fNoti.sendtoAll = true
             await fNoti.save()
+
+            // Gửi thông báo
             const response = await admin.messaging().sendEachForMulticast({
                 tokens: fcm_tokens_list,
                 ...payload
             })
+
             return res.status(200).json({
                 message: "Gửi thông báo thành công",
                 successCount: response.successCount,
                 failureCount: response.failureCount,
-                totalTokens: fcm_tokens_list.length
-            })
+                totalTokens: fcm_tokens_list.length,
+                responses: response.responses  
+            });
         }
-        else{
+        else {
             await noti.updateOne(
-                { notiID: notificationID }, 
+                { notiID: notificationID },
                 { scheduleAt: scheduleAt, sendtoAll: true }
-            )
-            return  res.status(200).json({ message: "Lên lịch gửi thông báo thành công", data: fNoti }); 
+            );
+
+            return res.status(200).json({
+                message: "Lên lịch gửi thông báocho tất cả user thành công",
+                data: fNoti
+            });
         }
     }
-    catch(err){
-        res.status(500).json({message: "Gửi thông báo thất bại", details: err.message})
+    catch (err) {
+        console.error("🔥 Lỗi khi gửi thông báo:", err);
+        res.status(500).json({
+            message: "Gửi thông báo thất bại",
+            details: err.message
+        });
     }
-})
+});
+
 
 // Gửi thông báo cho những user cụ thể
 router.post('/send-to-users', async (req, res) => {
@@ -218,5 +243,6 @@ router.get('/list-all', async (req, res) => {
         res.json({ status: "Failed", message: "Lấy danh sách tất cả thông báo thất bại", data: err });
     }
 })
+
 
 module.exports = router

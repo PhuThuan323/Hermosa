@@ -8,7 +8,7 @@ const order = require('../../models/order')
 const user = require('../../models/user')
 const voucher = require('../../models/voucher')
 const voucherUsage = require('../../models/voucherUsage')
-
+const {logEvent} = require('../../logging/eventLogger')
 dotenv.config();
 
 //---------------------------TAO DON HANG MOI------------------
@@ -86,45 +86,63 @@ async function autoApplyVoucher(fOrder) {
     discountAmount: maxDiscount
   }
 }
-router.post('/create', async (req,res)=>{
-  try{
-    let { userID } = req.body
-    const userCart = await cart.findOne({ userID })
-    const findOrder = await order.findOne({ userID })
-    if(findOrder){
-        return res.json({status: "Failed", message: "Đã có sẳn một order chưa được hoàn thành, hãy hoàn thành trước khi tạo thêm order khác"})
-    }
-    let newOrder = new order({
-        orderID: `ORD-${Date.now()}`,
-        status: "pending",
-        userID,
-        totalInvoice: userCart.totalMoney,
-        finalTotal: userCart.totalMoney,
-        products: userCart.items,
-        paymentStatus: "not_done",
-        createAt: Date.now()
-    })
-    await newOrder.save()
-    
-    // Áp dụng voucher tốt nhất
-    const voucherResult = await autoApplyVoucher(newOrder)
-    newOrder = await order.findOneAndUpdate(
-      { orderID: newOrder.orderID },
-      { voucherCodeApply: voucherResult.voucherCodeApply,
-        discountAmount: voucherResult.discountAmount,
-      },
-      { new: true }
-    )
-    await newOrder.save()
-    newOrder.finalTotal = Number(newOrder.totalInvoice) - Number(newOrder.discountAmount) + Number(newOrder.deliveryFee) + Number(newOrder.tipsforDriver)
-    await newOrder.save()
-    res.json({ status: "Success", message: "Tạo đơn hàng thành công", data: newOrder})
-  }
-  catch (err){  
-    res.json({status: 'Failed', message: 'Tạo đơn hàng mới không thành công', detail: err.message})
-  }
-})
+router.post('/create', async (req, res) => {
+    try {
+        const { userID } = req.body;
+        const userCart = await cart.findOne({ userID }).lean();
 
+        if (!userCart || userCart.items.length === 0) {
+            return res.json({ status: "Failed", message: "Giỏ hàng rỗng, không thể tạo đơn hàng" });
+        }
+        
+        const existingPendingOrder = await order.findOne({ 
+            userID, 
+            status: { $in: ["pending", "processing", "confirmed"] } 
+        });
+
+        if (existingPendingOrder) {
+            return res.json({
+                status: "Failed", 
+                message: "Đã có sẵn một order chưa được hoàn thành, hãy hoàn thành trước khi tạo thêm order khác"
+            });
+        }
+        let newOrder = new order({
+            orderID: `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`, // Thêm random để giảm nguy cơ trùng lặp
+            status: "pending",
+            userID,
+            totalInvoice: userCart.totalMoney,
+            finalTotal: userCart.totalMoney, 
+            products: userCart.items,
+            paymentStatus: "not_done",
+            createAt: Date.now()
+        });
+        const voucherResult = await autoApplyVoucher(newOrder); 
+        
+        newOrder.voucherCodeApply = voucherResult.voucherCodeApply || null;
+        newOrder.discountAmount = voucherResult.discountAmount || 0;
+        
+        const deliveryFee = newOrder.deliveryFee || 0; 
+        const tipsforDriver = newOrder.tipsforDriver || 0;
+
+        newOrder.finalTotal = (
+            Number(newOrder.totalInvoice) - 
+            Number(newOrder.discountAmount) + 
+            Number(deliveryFee) + 
+            Number(tipsforDriver)
+        );
+
+        const visitorID = userID; 
+        for (let item of newOrder.products) {
+            logEvent(visitorID, item.productID, 'buy'); 
+        }
+        await newOrder.save();
+        await cart.deleteOne({ userID }); 
+        res.json({ status: "Success", message: "Tạo đơn hàng thành công", data: newOrder });
+    } catch (err) {
+        console.error("Lỗi khi tạo đơn hàng:", err);
+        res.status(500).json({ status: 'Failed', message: 'Tạo đơn hàng mới không thành công', detail: err.message });
+    }
+});
 
 //Xóa đơn hàng, khi người dùng interupt đơn hàng mà không nhấn place order chính thức (thoát giao diện or refresh trang đơn hàng
 router.delete('/delete-interrupt-order', async (req,res)=>{

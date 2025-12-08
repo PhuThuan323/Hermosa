@@ -6,7 +6,7 @@ dotenv.configDotenv()
 const multer = require('multer');
 const user = require('../models/user')
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
-
+const { logEvent } = require('../logging/eventLogger')
 const cloudinary = require('cloudinary').v2;
 
 cloudinary.config({
@@ -94,7 +94,9 @@ router.get('/all-product', async (req, res)=>{
 router.get('/product', async(req,res)=>{
   const {productID} = req.query
   try{
+    const visitorID = req.session?.id || req.ip || 'ANONYMOUS_USER';
     const finditem = await menu.findOne({productID})
+    logEvent(visitorID, productID, 'view')
     res.json({status: "Success", message: "Liệt kê sản phẩm thành công", data: finditem})
   }
   catch(err){
