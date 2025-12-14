@@ -1,0 +1,25 @@
+name: Hermosa Coffee Deployment
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy NodeJS backend via SSH
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.HOST }}
+          username: sakurado222
+          key: ${{ secrets.DEPLOY_KEY }}
+          port: 22
+          script: |
+            cd ~/final/server_backend/hermosa_backend
+            git fetch origin
+            git checkout master
+            git pull origin master
+            npm install
+            pm2 restart hermosa-backend
