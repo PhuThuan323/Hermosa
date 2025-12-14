@@ -62,4 +62,7 @@ app.use('/recommend', recommendRoute)
 const reviewRoute = require('./api/order/review')
 app.use('/review', reviewRoute)
 
+const topsellRoute = require('./api/recommend/top_sale')
+app.use('/rec',topsellRoute)
+
 app.listen(port, () => console.log("Server running on port 8000"));

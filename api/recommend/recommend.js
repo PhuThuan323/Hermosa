@@ -37,8 +37,8 @@ router.get('/alsoView', async(req,res)=>{
 router.get('/next-item-prediction', async(req,res)=>{
     const {productID} = req.query
     try{
-        console.log(`${process.env.PYTHON_SERVICE_URL}recommend/upsell-item/${productID}`)
-        const response = await axios.get(`${process.env.PYTHON_SERVICE_URL}recommend/upsell-item/${productID}`)
+        console.log(`${process.env.PYTHON_SERVICE_URL}recommend/next_item/${productID}`)
+        const response = await axios.get(`${process.env.PYTHON_SERVICE_URL}recommend/next_item/${productID}`)
         res.json({status: "Success", message: "Gợi ý các món upsell thành công", data: response.data})
     }
     catch(err){

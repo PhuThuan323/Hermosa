@@ -1,10 +1,10 @@
 const moongoose = require('mongoose');
 const Schema = moongoose.Schema;
 const voucherUsageSchema = new Schema({
-    userID: {type: String, required: true, ref: 'User'},
+    userID: {type: String},
     voucherUse: [
         {
-            voucherCode: {type: String, required: true, ref: 'voucher'},
+            voucherCode: {type: String},
             usedAt: { type: Date, default: Date.now }
         }
     ]
