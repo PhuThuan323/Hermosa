@@ -2,7 +2,7 @@ name: Hermosa Coffee Deployment
 
 on:
   push:
-    branches: [main]
+    branches: [master]
 
 jobs:
   deploy:
@@ -12,7 +12,7 @@ jobs:
         uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ secrets.HOST }}
-          username: ubuntu
+          username: sakurado222
           key: ${{ secrets.DEPLOY_KEY }}
           port: 22
           script: |
