@@ -1,17 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { X, ImageIcon, Palette } from "lucide-react";
+import { X, ImageIcon } from "lucide-react";
 import { toast } from "react-hot-toast";
 
 const CATEGORY_MAP = {
   Cakes: "cake",
   Drinks: "drink",
-  Foods: "launch", 
+  Foods: "launch",
 };
-
-const PRESET_COLORS = [
-  "#FFB3BA", "#FFDFBA", "#FFFFBA", "#BAFFC9", "#BAE1FF",
-  "#FFC1E3", "#D4A5FF", "#A7ECD8", "#FFD1A4", "#C1E1FF"
-];
 
 export default function ProductModal({ isOpen, onClose, onSubmit, initialData, isEdit }) {
   const [formData, setFormData] = useState({
@@ -19,16 +14,21 @@ export default function ProductModal({ isOpen, onClose, onSubmit, initialData, i
     category: [],
     price: "",
     description: "",
-    backgroundHexacode: "#FFB6C1",
+    backgroundHexacode: "#FFB6C1", // giữ để backend không lỗi
     image: null,
   });
 
   useEffect(() => {
     if (isOpen) {
       if (initialData && isEdit) {
-        const displayCategory = initialData.rawCategory === "launch" ? "Foods" :
-                                initialData.rawCategory === "cake" ? "Cakes" :
-                                initialData.rawCategory === "drink" ? "Drinks" : "Foods";
+        const displayCategory =
+          initialData.rawCategory === "launch"
+            ? "Foods"
+            : initialData.rawCategory === "cake"
+            ? "Cakes"
+            : initialData.rawCategory === "drink"
+            ? "Drinks"
+            : "Foods";
 
         setFormData({
           name: initialData.name || "",
@@ -54,17 +54,17 @@ export default function ProductModal({ isOpen, onClose, onSubmit, initialData, i
   if (!isOpen) return null;
 
   const handleCategoryChange = (cat) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      category: prev.category.includes(cat) ? prev.category.filter(c => c !== cat) : [cat]
+      category: prev.category.includes(cat) ? prev.category.filter((c) => c !== cat) : [cat],
     }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (!formData.name.trim()) return toast.error("Nhập tên sản phẩm nha bé ơi");
-    if (formData.category.length === 0) return toast.error("Chọn danh mục nha bé ơi");
+    if (!formData.name.trim()) return toast.error("Nhập tên sản phẩm nha");
+    if (formData.category.length === 0) return toast.error("Chọn danh mục nha");
     if (!formData.price || Number(formData.price) <= 0) return toast.error("Giá phải lớn hơn 0 nha");
 
     const submitData = {
@@ -72,7 +72,7 @@ export default function ProductModal({ isOpen, onClose, onSubmit, initialData, i
       price: Number(formData.price),
       description: formData.description.trim(),
       category: CATEGORY_MAP[formData.category[0]],
-      backgroundHexacode: formData.backgroundHexacode,
+      backgroundHexacode: formData.backgroundHexacode, // vẫn gửi để backend không lỗi
       image: formData.image,
     };
 
@@ -94,14 +94,11 @@ export default function ProductModal({ isOpen, onClose, onSubmit, initialData, i
             </button>
           </div>
 
-          {/* 1. Ảnh + Preview */}
+          {/* Ảnh + Preview */}
           <div className="bg-gradient-to-br from-pink-50 to-rose-50 rounded-2xl p-8 mb-8 text-center border-2 border-dashed border-pink-300">
             {formData.image ? (
               <div className="space-y-6">
-                <div 
-                  className="w-64 h-64 mx-auto rounded-3xl shadow-2xl border-8 border-white overflow-hidden"
-                  style={{ backgroundColor: formData.backgroundHexacode }}
-                >
+                <div className="w-64 h-64 mx-auto rounded-3xl shadow-2xl border-8 border-white overflow-hidden">
                   <img
                     src={typeof formData.image === "string" ? formData.image : URL.createObjectURL(formData.image)}
                     alt="Preview"
@@ -110,7 +107,12 @@ export default function ProductModal({ isOpen, onClose, onSubmit, initialData, i
                 </div>
                 <label className="cursor-pointer inline-block px-8 py-3 bg-pink-500 text-white rounded-xl font-bold hover:bg-pink-600 transition">
                   Đổi ảnh
-                  <input type="file" accept="image/*" hidden onChange={(e) => e.target.files[0] && setFormData({ ...formData, image: e.target.files[0] })} />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    hidden
+                    onChange={(e) => e.target.files[0] && setFormData({ ...formData, image: e.target.files[0] })}
+                  />
                 </label>
               </div>
             ) : (
@@ -119,17 +121,25 @@ export default function ProductModal({ isOpen, onClose, onSubmit, initialData, i
                   <ImageIcon className="mx-auto w-20 h-20 text-pink-500 mb-4" />
                   <p className="text-2xl font-bold text-pink-700">Click để upload ảnh sản phẩm</p>
                 </div>
-                <input type="file" accept="image/*" hidden onChange={(e) => e.target.files[0] && setFormData({ ...formData, image: e.target.files[0] })} />
+                <input
+                  type="file"
+                  accept="image/*"
+                  hidden
+                  onChange={(e) => e.target.files[0] && setFormData({ ...formData, image: e.target.files[0] })}
+                />
               </label>
             )}
           </div>
 
-          {/* 2. Danh mục */}
+          {/* Danh mục */}
           <div className="mb-8">
             <h3 className="text-xl font-bold mb-4 text-gray-800">Danh mục</h3>
             <div className="grid grid-cols-3 gap-6">
               {["Cakes", "Drinks", "Foods"].map((cat) => (
-                <label key={cat} className="flex items-center gap-4 cursor-pointer p-5 rounded-2xl hover:bg-pink-50 transition bg-gray-50">
+                <label
+                  key={cat}
+                  className="flex items-center gap-4 cursor-pointer p-5 rounded-2xl hover:bg-pink-50 transition bg-gray-50"
+                >
                   <input
                     type="checkbox"
                     checked={formData.category.includes(cat)}
@@ -142,14 +152,14 @@ export default function ProductModal({ isOpen, onClose, onSubmit, initialData, i
             </div>
           </div>
 
-          {/* 3. Tên + Giá */}
-          <div className="grid grid-cols-2 gap-8 mb-10">
+          {/* Tên + Giá */}
+          <div className="grid grid-cols-2 gap-8 mb-8">
             <div>
               <label className="block text-xl font-bold mb-3 text-gray-800">Tên sản phẩm</label>
               <input
                 type="text"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })} 
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="VD: Trà sữa trân châu Hermosa"
                 className="w-full px-6 py-4 text-xl border-2 border-pink-200 rounded-2xl focus:border-pink-500 focus:ring-4 focus:ring-pink-100 outline-none"
               />
@@ -166,48 +176,16 @@ export default function ProductModal({ isOpen, onClose, onSubmit, initialData, i
             </div>
           </div>
 
-          {/* 4. MÀU NỀN – ĐẶT CUỐI CÙNG */}
-          <div className="mb-8 p-6 bg-pink-50 rounded-2xl border-2 border-pink-200">
-            <h3 className="text-xl font-bold mb-5 text-gray-800 flex items-center gap-3">
-              <Palette size={28} className="text-pink-600" />
-              Màu nền sản phẩm (tùy chỉnh)
-            </h3>
-            
-            <div className="space-y-5">
-              <div className="flex items-center gap-5">
-                <input
-                  type="color"
-                  value={formData.backgroundHexacode}
-                  onChange={(e) => setFormData({ ...formData, backgroundHexacode: e.target.value })}
-                  className="w-24 h-24 rounded-2xl cursor-pointer border-4 border-white shadow-xl"
-                />
-                <div>
-                  <input
-                    type="text"
-                    value={formData.backgroundHexacode}
-                    onChange={(e) => setFormData({ ...formData, backgroundHexacode: e.target.value.toUpperCase() })}
-                    className="px-5 py-3 w-44 text-xl font-mono font-bold text-pink-700 border-2 border-pink-300 rounded-xl text-center"
-                    placeholder="#FFB6C1"
-                  />
-                  <p className="text-sm text-gray-600 mt-2">Nhập mã màu hoặc dùng eyedropper</p>
-                </div>
-              </div>
-
-              <div>
-                <p className="text-sm font-medium text-gray-700 mb-3">Gợi ý màu đẹp cho Hermosa:</p>
-                <div className="grid grid-cols-10 gap-3">
-                  {PRESET_COLORS.map(color => (
-                    <button
-                      key={color}
-                      onClick={() => setFormData({ ...formData, backgroundHexacode: color })}
-                      className={`w-full aspect-square rounded-xl border-4 border-white shadow-lg hover:scale-125 transition-all duration-200 ${formData.backgroundHexacode === color ? 'ring-4 ring-pink-500' : ''}`}
-                      style={{ backgroundColor: color }}
-                      title={color}
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
+          {/* Mô tả sản phẩm */}
+          <div className="mb-10">
+            <label className="block text-xl font-bold mb-3 text-gray-800">Mô tả sản phẩm</label>
+            <textarea
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              placeholder="Nhập mô tả chi tiết về sản phẩm (nguyên liệu, hương vị, kích thước...)"
+              rows="5"
+              className="w-full px-6 py-4 text-lg border-2 border-pink-200 rounded-2xl focus:border-pink-500 focus:ring-4 focus:ring-pink-100 outline-none resize-none"
+            />
           </div>
 
           {/* Nút bấm */}

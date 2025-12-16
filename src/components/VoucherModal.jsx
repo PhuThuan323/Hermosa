@@ -4,7 +4,7 @@ import { format } from "date-fns";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 
-const API_BASE = "http://34.151.64.207/voucher";
+const API_BASE = "http://34.142.200.151/voucher";
 
 export default function VoucherModal({ isOpen, onClose, onSubmit, initialData, isEdit }) {
   const [formData, setFormData] = useState({

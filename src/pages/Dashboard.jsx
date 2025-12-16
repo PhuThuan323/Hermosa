@@ -13,7 +13,7 @@ import axios from "axios";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, addMonths, subMonths } from "date-fns";
 import { toast } from "react-hot-toast";
 
-const API_BASE = "http://34.151.64.207";
+const API_BASE = "http://34.142.200.151";
 const MENU_API = `${API_BASE}/menu`;
 
 export default function Dashboard() {

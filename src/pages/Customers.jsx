@@ -6,7 +6,7 @@ import { toast } from "react-hot-toast";
 import ConfirmDeleteModal from "../components/ConfirmDeleteModal";
 import DeleteSuccessModal from "../components/DeleteSuccessModal";
 
-const API_BASE = "http://34.151.64.207/user";
+const API_BASE = "http://34.142.200.151/user";
 const ITEMS_PER_PAGE = 10;
 
 export default function CustomerManagement() {
@@ -30,15 +30,13 @@ export default function CustomerManagement() {
 
       if (res.data.status === "Success") {
         const formatted = res.data.data.map((user) => ({
-          id: user.userID || user._id.toString().slice(-6),
+          id: user.userID || user._id.toString(),
           name: user.name || "Chưa đặt tên",
           email: user.email || "Không có email",
-          phone: user.phone || "Chưa cập nhật",
-          orders: user.totalOrders || 0,
-          totalSpent: user.totalSpent || 0,
           signupMethod: user.signupMethod || "Username",
-          joinDate: user.createdAt ? new Date(user.createdAt).toLocaleDateString("vi-VN") : "Không rõ",
-          rawUser: user,
+          joinDate: user.createdAt
+            ? new Date(user.createdAt).toLocaleDateString("vi-VN")
+            : "Không rõ",
         }));
 
         setAllCustomers(formatted);
@@ -83,11 +81,17 @@ export default function CustomerManagement() {
 
   const doDelete = async () => {
     try {
+      await axios.delete(`${API_BASE}/delete`, {
+        data: { userID: toDeleteId },
+      });
+
       setAllCustomers((prev) => prev.filter((c) => c.id !== toDeleteId));
       setFilteredCustomers((prev) => prev.filter((c) => c.id !== toDeleteId));
+
       toast.success("Xóa khách hàng thành công!");
     } catch (err) {
-      toast.error("Xóa thất bại");
+      const msg = err.response?.data?.message || "Xóa thất bại";
+      toast.error(msg);
     } finally {
       setConfirmOpen(false);
       setDoneOpen(true);
@@ -96,10 +100,10 @@ export default function CustomerManagement() {
 
   return (
     <div className="bg-surface min-h-screen px-8 py-4">
-      <h1 className="text-3xl font-bold text-gray-900 mb-6">Customer Management</h1>
+      <h1 className="text-3xl font-bold text-gray-900 mb-6">Quản lý khách hàng</h1>
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-        {/* Top bar */}
+        {/* Top bar: Search + Thêm khách hàng */}
         <div className="flex flex-wrap justify-between items-center mb-6 gap-4">
           <div className="relative w-96">
             <Search className="absolute left-3 top-3 text-gray-400 w-5 h-5" />
@@ -151,7 +155,9 @@ export default function CustomerManagement() {
                   ) : (
                     displayCustomers.map((cust) => (
                       <tr key={cust.id} className="border-t hover:bg-pink-50/30 transition">
-                        <td className="py-4 px-6 font-bold text-pink-700">#{cust.id}</td>
+                        <td className="py-4 px-6 font-bold text-pink-700">
+                          #{cust.id.slice(-6)}
+                        </td>
                         <td className="py-4 px-6 font-bold">{cust.name}</td>
                         <td className="py-4 px-6 text-gray-600">{cust.email}</td>
                         <td className="py-4 px-6">
@@ -193,15 +199,13 @@ export default function CustomerManagement() {
               </table>
             </div>
 
-            {/* PHÂN TRANG */}
+            {/* Phân trang */}
             <div className="mt-8 flex flex-col items-center gap-6">
               <div className="flex items-center gap-3">
                 <button
-                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="px-5 py-3 rounded-xl font-bold transition-all flex items-center gap-2
-                    disabled:opacity-40 disabled:cursor-not-allowed
-                    bg-white border border-gray-300 hover:bg-pink-50 hover:border-pink-300 text-gray-700"
+                  className="px-5 py-3 rounded-xl font-bold transition-all flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed bg-white border border-gray-300 hover:bg-pink-50 hover:border-pink-300 text-gray-700"
                 >
                   <ChevronLeft size={20} /> Trước
                 </button>
@@ -247,11 +251,9 @@ export default function CustomerManagement() {
                 </div>
 
                 <button
-                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
-                  className="px-5 py-3 rounded-xl font-bold transition-all flex items-center gap-2
-                    disabled:opacity-40 disabled:cursor-not-allowed
-                    bg-white border border-gray-300 hover:bg-pink-50 hover:border-pink-300 text-gray-700"
+                  className="px-5 py-3 rounded-xl font-bold transition-all flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed bg-white border border-gray-300 hover:bg-pink-50 hover:border-pink-300 text-gray-700"
                 >
                   Sau <ChevronRight size={20} />
                 </button>
@@ -266,7 +268,6 @@ export default function CustomerManagement() {
         )}
       </div>
 
-      {/* Modals */}
       <ConfirmDeleteModal
         open={confirmOpen}
         title="Xóa khách hàng"

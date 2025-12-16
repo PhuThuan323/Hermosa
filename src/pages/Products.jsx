@@ -6,7 +6,7 @@ import DeleteSuccessModal from "../components/DeleteSuccessModal.jsx";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 
-const API_BASE = "http://34.151.64.207/menu";
+const API_BASE = "http://34.142.200.151/menu";
 
 export default function Products() {
   const [products, setProducts] = useState([]);
@@ -35,13 +35,11 @@ export default function Products() {
               ? "Cakes"
               : item.category === "drink"
               ? "Drinks"
-              : item.category === "launch"
-              ? "Foods"
               : "Foods",
           rawCategory: item.category,
           price: new Intl.NumberFormat("vi-VN").format(item.price) + " đ",
           image: item.picture,
-          description: item.description,
+          description: item.description || "Chưa có mô tả",
           backgroundHexacode: item.backgroundHexacode || "#FFB6C1",
         }));
 
@@ -126,7 +124,7 @@ export default function Products() {
       if (formData.image) data.append("picture", formData.image);
 
       await axios.post(`${API_BASE}/add`, data);
-      toast.success("Thêm sản phẩm thành công! Bé giỏi quá~");
+      toast.success("Thêm sản phẩm thành công!");
       fetchProducts();
       setIsModalOpen(false);
     } catch (err) {
@@ -134,10 +132,10 @@ export default function Products() {
     }
   };
 
-  // SỬA SẢN PHẨM – Gửi thêm backgroundHexacode & category 
+  // SỬA SẢN PHẨM
   const handleEditProduct = async (formData) => {
     try {
-      // 1. Cập nhật ảnh nếu có đổi (riêng biệt)
+      // Cập nhật ảnh nếu có thay đổi
       if (formData.image && typeof formData.image !== "string") {
         const imgData = new FormData();
         imgData.append("productID", editingProduct.id);
@@ -145,17 +143,16 @@ export default function Products() {
         await axios.put(`${API_BASE}/change-product-picture`, imgData);
       }
 
-      // 2. Cập nhật chi tiết, màu nền, và category (backend cần sửa để nhận field này)
+      // Cập nhật thông tin chi tiết (gồm description và backgroundHexacode để backend không lỗi)
       await axios.put(`${API_BASE}/change-product-detail`, {
         productID: editingProduct.id,
         name: formData.name,
         price: formData.price,
         description: formData.description || "",
-        backgroundHexacode: formData.backgroundHexacode,
-        category: formData.category, 
+        backgroundHexacode: formData.backgroundHexacode || "#FFB6C1",
       });
 
-      toast.success("Cập nhật thành công! Màu mới xinh lung linh luôn bé ơi~");
+      toast.success("Cập nhật thành công!");
       fetchProducts();
       setEditingProduct(null);
     } catch (err) {
@@ -167,7 +164,7 @@ export default function Products() {
   return (
     <div className="bg-surface min-h-screen px-8 py-4">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Product Management</h1>
+        <h1 className="text-3xl font-bold text-gray-900">Quản lý sản phẩm</h1>
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
@@ -225,6 +222,7 @@ export default function Products() {
                     <th className="text-left py-4 px-6">Hình</th>
                     <th className="text-left py-4 px-6">Tên sản phẩm</th>
                     <th className="text-left py-4 px-6">Danh mục</th>
+                    <th className="text-left py-4 px-6">Mô tả</th>
                     <th className="text-left py-4 px-6">Giá</th>
                     <th className="text-left py-4 px-6">Hành động</th>
                   </tr>
@@ -232,9 +230,9 @@ export default function Products() {
                 <tbody>
                   {filteredProducts.length === 0 ? (
                     <tr>
-                      <td colSpan="6" className="text-center py-20 text-gray-500 text-lg">
+                      <td colSpan="7" className="text-center py-20 text-gray-500 text-lg">
                         {searchTerm || activeCategory !== "All"
-                          ? "Không tìm thấy sản phẩm nào bé ơi"
+                          ? "Không tìm thấy sản phẩm nào"
                           : "Chưa có sản phẩm"}
                       </td>
                     </tr>
@@ -263,6 +261,9 @@ export default function Products() {
                           >
                             {item.category}
                           </span>
+                        </td>
+                        <td className="py-4 px-6 text-gray-600 max-w-md truncate">
+                          {item.description}
                         </td>
                         <td className="py-4 px-6 text-pink-600 font-bold text-lg">{item.price}</td>
                         <td className="py-4 px-6">
@@ -319,7 +320,7 @@ export default function Products() {
       <ConfirmDeleteModal
         open={confirmOpen}
         title="Xóa sản phẩm"
-        message="Chắc chắn xóa không bé ơi?"
+        message="Chắc chắn xóa không?"
         onCancel={() => setConfirmOpen(false)}
         onConfirm={handleDelete}
       />

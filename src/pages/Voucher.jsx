@@ -15,7 +15,7 @@ import { format } from "date-fns";
 import VoucherModal from "../components/VoucherModal";
 import ConfirmDeleteModal from "../components/ConfirmDeleteModal";
 
-const API_BASE = "http://34.151.64.207/voucher";
+const API_BASE = "http://34.142.200.151/voucher";
 const ITEMS_PER_PAGE = 10;
 
 export default function VoucherManagement() {
@@ -24,7 +24,7 @@ export default function VoucherManagement() {
   const [displayVouchers, setDisplayVouchers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [activeTab, setActiveTab] = useState("All");
+  const [activeTab, setActiveTab] = useState("All"); // All, Active, Expired, Upcoming
   const [currentPage, setCurrentPage] = useState(1);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -85,14 +85,21 @@ export default function VoucherManagement() {
     fetchVouchers();
   }, []);
 
-  // Lọc tab + tìm kiếm
+  // Lọc theo tab + tìm kiếm
   useEffect(() => {
-    let result = vouchers;
+    let result = [...vouchers];
 
-    if (activeTab === "Active") result = result.filter((v) => v.status === "Active");
-    else if (activeTab === "Expired") result = result.filter((v) => v.status === "Expired");
-    else if (activeTab === "Upcoming") result = result.filter((v) => v.status === "Upcoming");
+    // Lọc theo tab
+    if (activeTab === "Active") {
+      result = result.filter((v) => v.status === "Active");
+    } else if (activeTab === "Expired") {
+      result = result.filter((v) => v.status === "Expired");
+    } else if (activeTab === "Upcoming") {
+      result = result.filter((v) => v.status === "Upcoming");
+    }
+    // "All" thì không lọc
 
+    // Tìm kiếm
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       result = result.filter(
@@ -123,7 +130,7 @@ export default function VoucherManagement() {
       toast.success("Xóa voucher thành công!");
       fetchVouchers();
     } catch (err) {
-      toast.error("Xóa thất bại");
+      toast.error("Xóa thất bại: " + (err.response?.data?.message || err.message));
     } finally {
       setConfirmDelete(false);
       setToDeleteCode("");
@@ -135,11 +142,17 @@ export default function VoucherManagement() {
     toast.success(`Đã copy: ${code}`);
   };
 
+  // Đếm số lượng cho từng tab
+  const countAll = vouchers.length;
+  const countActive = vouchers.filter((v) => v.status === "Active").length;
+  const countExpired = vouchers.filter((v) => v.status === "Expired").length;
+  const countUpcoming = vouchers.filter((v) => v.status === "Upcoming").length;
+
   const tabs = [
-    `Tất cả (${vouchers.length})`,
-    `Đang hoạt động (${vouchers.filter((v) => v.status === "Active").length})`,
-    `Hết hạn (${vouchers.filter((v) => v.status === "Expired").length})`,
-    `Sắp tới (${vouchers.filter((v) => v.status === "Upcoming").length})`,
+    { key: "All", label: `Tất cả (${countAll})` },
+    { key: "Active", label: `Đang hoạt động (${countActive})` },
+    { key: "Expired", label: `Hết hạn (${countExpired})` },
+    { key: "Upcoming", label: `Sắp tới (${countUpcoming})` },
   ];
 
   return (
@@ -153,15 +166,15 @@ export default function VoucherManagement() {
           <div className="bg-pink-50 rounded-xl px-4 py-2 flex gap-3 flex-wrap">
             {tabs.map((tab) => (
               <button
-                key={tab}
-                onClick={() => setActiveTab(tab.includes("Tất cả") ? "All" : tab.split(" ")[0])}
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
                 className={`px-6 py-2.5 text-sm font-bold rounded-lg transition-all ${
-                  activeTab === (tab.includes("Tất cả") ? "All" : tab.split(" ")[0])
+                  activeTab === tab.key
                     ? "bg-white text-pink-600 shadow-md"
                     : "text-gray-700 hover:bg-white/70"
                 }`}
               >
-                {tab}
+                {tab.label}
               </button>
             ))}
           </div>
@@ -179,7 +192,10 @@ export default function VoucherManagement() {
             </div>
 
             <button
-              onClick={() => setIsModalOpen(true)}
+              onClick={() => {
+                setEditingVoucher(null);
+                setIsModalOpen(true);
+              }}
               className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white font-bold rounded-xl hover:from-pink-600 hover:to-rose-600 transition shadow-lg"
             >
               <Plus size={20} /> Tạo Voucher
@@ -252,7 +268,10 @@ export default function VoucherManagement() {
                         <td className="py-4 px-6">
                           <div className="flex gap-3">
                             <button
-                              onClick={() => setEditingVoucher(v)}
+                              onClick={() => {
+                                setEditingVoucher(v);
+                                setIsModalOpen(true);
+                              }}
                               className="p-2.5 rounded-lg border border-gray-300 hover:bg-blue-50 transition"
                               title="Sửa"
                             >
@@ -289,12 +308,13 @@ export default function VoucherManagement() {
                 </button>
 
                 <div className="flex gap-2">
-                  {[...Array(Math.min(5, totalPages))].map((_, i) => {
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                     let pageNum;
                     if (totalPages <= 5) pageNum = i + 1;
                     else if (currentPage <= 3) pageNum = i + 1;
                     else if (currentPage >= totalPages - 2) pageNum = totalPages - 4 + i;
                     else pageNum = currentPage - 2 + i;
+
                     return (
                       <button
                         key={pageNum}
@@ -309,6 +329,7 @@ export default function VoucherManagement() {
                       </button>
                     );
                   })}
+
                   {totalPages > 5 && currentPage < totalPages - 3 && (
                     <>
                       <span className="px-3 text-gray-500">...</span>
@@ -330,6 +351,7 @@ export default function VoucherManagement() {
                   Sau <ChevronRight size={20} />
                 </button>
               </div>
+
               <p className="text-sm text-gray-600">
                 Trang <span className="text-pink-600 font-bold text-lg">{currentPage}</span> / {totalPages || 1} • Tổng{" "}
                 <strong>{filteredVouchers.length}</strong> voucher
