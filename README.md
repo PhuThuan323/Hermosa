@@ -2,12 +2,23 @@
 
 This project is ready to import into **CodeSandbox** or run locally.
 
-## Quick start (CodeSandbox)
-1. Go to https://codesandbox.io/ and choose **Upload** or **'Import Project'**.
-2. Upload this zip or paste the GitHub repo URL if you push it later.
-3. Wait for dependencies to install, then it will auto-preview.
+## Prerequisites (Yêu cầu hệ thống)
+Để chạy được ứng dụng này, bạn cần:
+* **VS Code:** Phiên bản mới nhất (Recommended: Koala/Ladybug...).
+* **JDK:** Java Development Kit 17 hoặc mới hơn.
+* **Internet:** Bắt buộc (để kết nối với Server Online).
+
+## Server Information (Thông tin Server)
+Backend đã được deploy và đang chạy online, không cần cài đặt local.
+* **Base URL:** `http://34.151.64.207/`
+* **Status:** Online (Active).
+
 
 ## Quick start (local)
+ **Clone Project:**
+    ```bash
+   git clone -b webadmin https://github.com/PhuThuan323/Hermosa.git
+    ```
 ```bash
 npm install
 npm run dev
