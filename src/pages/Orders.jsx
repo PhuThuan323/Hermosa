@@ -6,7 +6,7 @@ import { toast } from "react-hot-toast";
 import SelectOrderStatusModal from "../components/SelectOrderStatusModal";
 import SelectDateModal from "../components/SelectDateModal";
 
-const API_BASE = "http://34.142.200.151";
+const API_BASE = "http://34.124.251.251";
 const ITEMS_PER_PAGE = 10;
 
 export default function OrderManagement() {
