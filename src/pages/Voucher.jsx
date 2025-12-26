@@ -15,7 +15,7 @@ import { format } from "date-fns";
 import VoucherModal from "../components/VoucherModal";
 import ConfirmDeleteModal from "../components/ConfirmDeleteModal";
 
-const API_BASE = "http://34.142.200.151/voucher";
+const API_BASE = "http://34.124.251.251/voucher";
 const ITEMS_PER_PAGE = 10;
 
 export default function VoucherManagement() {
