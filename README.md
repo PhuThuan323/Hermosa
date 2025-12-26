@@ -25,9 +25,18 @@ git clone -b webadmin https://github.com/PhuThuan323/Hermosa.git
 
 ### Cài đặt & chạy project
 
+Chuyển đến mục Hermosa
 ```bash
 cd Hermosa
+```
+
+Cài công cụ quản lý thư viện npm
+```bash
 npm install
+```
+
+Chạy
+```bash
 npm run dev
 ```
 
