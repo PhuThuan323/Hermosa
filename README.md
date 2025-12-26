@@ -121,7 +121,7 @@ sudo nano hermosacoffee-f0a0a-firebase-adminsdk-fbsvc-d019cb125e.json
 ## Cài đặt Dependencies
 
 ```bash
-sudo apt install firebase-admin
+npm install firebase-admin
 npm install pm2 -g
 npm install
 ```
