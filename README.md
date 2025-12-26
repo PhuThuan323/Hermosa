@@ -207,6 +207,8 @@ pm2 start recommend.py --name recommend
 * Suggestion Model chạy ở port 8001
 * Khi viết api đã cho phía nodejs server tự loopback về cổng 8001 với những api liên quan nên không cần cấu hình thêm nginx nữa
 
+---
+
 # Hermosa Web Admin #
 ## Prerequisites (Yêu cầu hệ thống)
 
@@ -257,9 +259,9 @@ Sau khi chạy `npm run dev`, terminal sẽ hiển thị link dạng:
 http://localhost:8080/
 ```
 
-👉 Cách chạy:
+Cách chạy:
 
-1. Mở trình duyệt và truy cập link trên
+1. Mở trình duyệt và truy cập link trên hoặc nhấn F5 trong VS Code
 2. **Nhấn F5** để reload trang khi cần
 
 
