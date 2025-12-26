@@ -2,7 +2,7 @@
 
 Hướng dẫn cài đặt và deploy **Hermosa Backend & Recommendation System** trên **Ubuntu Server**.
 
-## 🛠 Prerequisites (Yêu cầu hệ thống)
+## Prerequisites (Yêu cầu hệ thống)
 
 * **OS:** Ubuntu 20.04+
 * **Internet:** Bắt buộc
