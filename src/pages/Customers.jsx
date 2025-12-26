@@ -6,7 +6,7 @@ import { toast } from "react-hot-toast";
 import ConfirmDeleteModal from "../components/ConfirmDeleteModal";
 import DeleteSuccessModal from "../components/DeleteSuccessModal";
 
-const API_BASE = "http://34.142.200.151/user";
+const API_BASE = "http://34.124.251.251/user";
 const ITEMS_PER_PAGE = 10;
 
 export default function CustomerManagement() {
