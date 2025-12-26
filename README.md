@@ -1,4 +1,4 @@
-### Hermosa Web Admin ###
+# Hermosa Web Admin #
 ## Prerequisites (Yêu cầu hệ thống)
 
 Để chạy được ứng dụng này, bạn cần:
