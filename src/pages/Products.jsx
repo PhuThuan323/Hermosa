@@ -6,7 +6,7 @@ import DeleteSuccessModal from "../components/DeleteSuccessModal.jsx";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 
-const API_BASE = "http://34.142.200.151/menu";
+const API_BASE = "http://34.124.251.251/menu";
 
 export default function Products() {
   const [products, setProducts] = useState([]);
