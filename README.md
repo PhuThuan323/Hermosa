@@ -1,6 +1,6 @@
 # Hermosa Backend #
 
-Hướng dẫn cài đặt và deploy **Hermosa Backend** trên **Ubuntu Server**.
+Hướng dẫn cài đặt và deploy **Hermosa Backend & Recommendation System** trên **Ubuntu Server**.
 
 ## 🛠 Prerequisites (Yêu cầu hệ thống)
 
@@ -17,7 +17,7 @@ Hướng dẫn cài đặt và deploy **Hermosa Backend** trên **Ubuntu Server*
 sudo apt install git
 git clone https://github.com/PhuThuan323/Hermosa.git
 cd Hermosa
-cd hermosa_backend
+git checkout master
 ```
 
 ## Cài đặt Node.js bằng NVM
@@ -101,7 +101,21 @@ PYTHON_SERVICE_URl=http://localhost:8001/
 sudo nano hermosacoffee-f0a0a-firebase-adminsdk-fbsvc-d019cb125e.json
 ```
 
-> Dán nội dung file JSON Firebase Admin SDK vào đây.
+```hermosacoffee-f0a0a-firebase-adminsdk-fbsvc-d019cb125e.json
+{
+  "type": "service_account",
+  "project_id": "hermosacoffee-f0a0a",
+  "private_key_id": "d019cb125e4498936cefb3a90349cc954fa11c5d",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQC+B+eejiMMXA1Q\nE+amksS6u/jAr6rI/JuIbh5DhRAZd0hrmwE3QYK3TMudmfk/uijT1/aeEKevP/o2\nX48B84jAhVt5vRRADWt6quxnPLBuf+8/qFu6vLXiv5vuEf9MfnjAP4dDXkK9gMaU\nbkPz6JBKno///5BrgyeaOlpOWZxDzgBdeaG8A4YfsqsJA21xFR6pEIkNk0vIRK4I\n1FhNt5tfOgjcrS58fe1U7CvHcsxS0+TbjDmjaVBr/EilsxMfBPa4Nm1AWGqPBGap\nbu1ju9ut8MW/s2/3fxhpyUi2T2ISXWR5g2F954rM1mUCTzM4x2/aCQPGrCNEsqsK\nnzxgdAWvAgMBAAECggEABDJ5f6uFA6de1edynzg7pyIyttLKc2D88HD6MySTu/RC\nAbptNvK39+N21dbKRgmPEErDVC9q/LhthtjqeDEQUqw/Xnt6IIYLWyy+RvN0tCQY\nPTAzQncbj1QLFiGIoYBjm19r1eWVlMjs2edrkc4Prc49wPo8jttZOxNR3kwlYuv2\nkWgW1miJlFlF+Og3SyJV2qfp4k1JPJSGa2AYMONIO8/9XeOO9FEhB9QAKqpaPiFh\n2fodqsZjgguRlLbtvYp1NBdFfV8SwO2C923eDCUShP3M+FWAzuiAOgiV9ujo0FVs\nIPhNpicee3k3vhaFJYo6hhQfwRYzA9y74M1J77pZkQKBgQD2ghoOzQ06eAdba+Ti\n4vnuNLXtGmB5WVlkNFNFjg0Fx+MBssR2dzGzpCx/naWsfKMBvaskRHzcFDCRuIVk\noOA9DdlB4whrXMtH/Vd8WJKnlG7+1PRNGTuuqP3tUz3kiV3mtXrVPPeBDUaqwFzr\n3iwdWkk+Kvgiy6SRy61Tkac6PwKBgQDFWRcySB61nLrn8Z+ccbKrSHI2ZWr3mMmv\nik90BeIYiWrN4jT4xbP6j2fdNi2HCRqEnJpQubrLz2z8SukoWjTdSyGN79O7owLB\nTWoJqzHtybAeynmbPB6aYfGllEG7kZ9Js1UbErsLrWXzgU2VbO721TuwhmZupMh2\niAuwNfH4kQKBgQD1jI9sYvFkZp/df1JWd4ZCtBrsfjPPbSNQX5b7WA68zWnhDTQK\nVZ0attTkoiKf+N9fIpHR5K8DgtEGtumZXW9BIgRiT0bZu2t64G8/G/OqHn+aNILO\nMe5zgz6+IwcqGXOCFxCuTLa2xIS6HjfxdDQ5YPBIjwDxmCzsVhjnf9U2fQKBgQCz\n87kjMIBQOsp0Fe/lSAgUB8udrn0LqVa/qu8obPTuSuAJPOvwrNag84NSQ8TgDX0Q\nz3wngDTFBC/tHqHdGeR6pbfDJZ18y/gHLAA1MNYmbnMaoKai1v9Q517iDX6i+va0\nzcIdHcdRrpv4nz+PsfV1PptfLC7bVYc2DngaBhbPAQKBgQCMfpzH+3bbwF1AqraO\nnxP+tYFt3xx0isiZz8EFeSG2y1I4dhg6CeD2OXoHoaEhYBYhJaA3rg6PflC0ALlL\nJjV94W69LuWQl0IflY0twP2T0E2pc3Y9txkOp+crNH4n2aT7FBF6QBtzUeo8LOyG\n2UPVavaSGglgwKHBCA7JomKMaQ==\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-fbsvc@hermosacoffee-f0a0a.iam.gserviceaccount.com",
+  "client_id": "105622209990551923884",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40hermosacoffee-f0a0a.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
+```
 
 
 ## Cài đặt Dependencies
@@ -170,6 +184,28 @@ http://<your_public_ip_address>
 * Nginx đóng vai trò reverse proxy
 * PM2 giúp backend chạy nền và tự restart
 
+# Python Recommended System #
+## Cài đặt môi trường ảo và activate môi trường python ảo 
+```bash
+git checkout suggestion
+sudo apt update
+sudo apt install python3 python3-pip python3-venv -y
+python3 -m base venv
+source venv/bin/activate
+pip install --upgrade pip
+```
+## Cài đặt các thư viện cần thiết để chạy được chương trình
+```environment
+pip install pandas numpy scikit-learn fastapi uvicorn torch tqdm scipy
+```
+### Train dựa trên dữ liệu và bắt đầu một microservice chạy python server
+```bash
+python recommend.py #Train dữ liệu ban đầu sau đó Ctrl+C để thoát ra và chạy service với pm2
+pm2 start recommend.py --name recommend
+```
+## Note
+* Suggestion Model chạy ở port 8001
+* Khi viết api đã cho phía nodejs server tự loopback về cổng 8001 với những api liên quan nên không cần cấu hình thêm nginx nữa
 
 # Hermosa Web Admin #
 ## Prerequisites (Yêu cầu hệ thống)
