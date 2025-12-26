@@ -190,7 +190,7 @@ http://<your_public_ip_address>
 git checkout suggestion
 sudo apt update
 sudo apt install python3 python3-pip python3-venv -y
-python3 -m base venv
+python3 -m venv venv
 source venv/bin/activate
 pip install --upgrade pip
 ```
@@ -198,7 +198,13 @@ pip install --upgrade pip
 ```environment
 pip install pandas numpy scikit-learn fastapi uvicorn torch tqdm scipy
 ```
-### Train dựa trên dữ liệu và bắt đầu một microservice chạy python server
+## Tải database từu github large file storage về
+```bash
+sudo apt install git-lfs -y
+git lfs install
+git lfs pull
+```
+## Train dựa trên dữ liệu và bắt đầu một microservice chạy python server
 ```bash
 python recommend.py #Train dữ liệu ban đầu sau đó Ctrl+C để thoát ra và chạy service với pm2
 pm2 start recommend.py --name recommend
