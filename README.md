@@ -6,7 +6,6 @@
 * **VS Code:** Phiên bản mới nhất.
 * **Internet:** Bắt buộc (để kết nối với Server Online).
 
----
 
 ## Server Information (Thông tin Server)
 
@@ -15,7 +14,6 @@ Backend đã được deploy và đang chạy online, **không cần cài đặt
 * **Base URL:** `http://34.151.64.207/`
 * **Status:** Online (Active)
 
----
 
 ## Quick start (local)
 
@@ -46,7 +44,6 @@ http://localhost:8080/
 1. Mở trình duyệt và truy cập link trên
 2. **Nhấn F5** để reload trang khi cần
 
----
 
 ## Pages
 
