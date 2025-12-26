@@ -2,7 +2,7 @@
 
 Để chạy được ứng dụng này, bạn cần:
 
-* **VS Code:** Phiên bản mới nhất (Recommended: Koala/Ladybug...).
+* **VS Code:** Phiên bản mới nhất.
 * **Internet:** Bắt buộc (để kết nối với Server Online).
 
 ---
