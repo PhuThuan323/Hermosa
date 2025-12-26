@@ -2,8 +2,6 @@
 
 Hướng dẫn cài đặt và deploy **Hermosa Backend** trên **Ubuntu Server**.
 
----
-
 ## 🛠 Prerequisites (Yêu cầu hệ thống)
 
 * **OS:** Ubuntu 20.04+
@@ -13,8 +11,6 @@ Hướng dẫn cài đặt và deploy **Hermosa Backend** trên **Ubuntu Server*
 * **Node.js** (cài qua NVM)
 * **PM2**
 
----
-
 ## Clone Source Code
 
 ```bash
@@ -23,8 +19,6 @@ git clone https://github.com/PhuThuan323/Hermosa.git
 cd Hermosa
 cd hermosa_backend
 ```
-
----
 
 ## Cài đặt Node.js bằng NVM
 
@@ -45,8 +39,6 @@ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
 ```bash
 nvm install 24
 ```
-
----
 
 ## Cấu hình biến môi trường (.env)
 
@@ -103,8 +95,6 @@ GHN_FROM_WARD_CODE=21809
 PYTHON_SERVICE_URl=http://localhost:8001/
 ```
 
----
-
 ## Firebase Admin SDK
 
 ```bash
@@ -113,7 +103,6 @@ sudo nano hermosacoffee-f0a0a-firebase-adminsdk-fbsvc-d019cb125e.json
 
 > Dán nội dung file JSON Firebase Admin SDK vào đây.
 
----
 
 ## Cài đặt Dependencies
 
@@ -122,8 +111,6 @@ sudo apt install firebase-admin
 npm install pm2 -g
 npm install
 ```
-
----
 
 ## Cấu hình Nginx
 
@@ -171,23 +158,18 @@ sudo systemctl restart nginx
 pm2 start server.js --name "hermosa"
 ```
 
----
-
 ## Truy cập hệ thống
 
 ```
 http://<your_public_ip_address>
 ```
 
----
-
-## 📝 Notes
+## Notes
 
 * Backend chạy tại **port 8000**
 * Nginx đóng vai trò reverse proxy
 * PM2 giúp backend chạy nền và tự restart
 
----
 
 # Hermosa Web Admin #
 ## Prerequisites (Yêu cầu hệ thống)
